@@ -1,0 +1,1 @@
+To get the project to run, cd into ProjectSourceCode and then run docker compose up. 
