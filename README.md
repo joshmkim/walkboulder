@@ -25,6 +25,7 @@ Use Case Diagram and Database Outline | https://lucid.app/lucidchart/f5b39da3-55
 For prerequisites, we need to have the docker installed and set up so that way the server can run.
 
 ## 5. Instructions 
+To get the project to run, cd into ProjectSourceCode and then run docker compose up. 
 
 ## 6. Running Tests
 
