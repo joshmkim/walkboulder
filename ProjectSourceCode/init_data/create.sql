@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS images
 DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users
 (
-    user_id SERIAL PRIMARY KEY NOT NULL,
     username VARCHAR(50) PRIMARY KEY,
     password VARCHAR(60) NOT NULL,
     total_distance SERIAL NOT NULL,
@@ -78,26 +77,26 @@ DROP TABLE IF EXISTS trails_to_user CASCADE;
 CREATE TABLE trails_to_user
 (
     trail_id INT NOT NULL,
-    user_id INT NOT NULL
+    username INT NOT NULL
 );
 
 DROP TABLE IF EXISTS user_to_friend CASCADE;
 CREATE TABLE user_to_friend
 (
-    user_id INT NOT NULL,
+    username INT NOT NULL,
     friend_id INT NOT NULL
 );
 
 DROP TABLE IF EXISTS trails_to_user CASCADE;
 CREATE TABLE user_to_achievements
 (
-    user_id INT NOT NULL,
+    username INT NOT NULL,
     achievements_id INT NOT NULL
 );
 
 DROP TABLE IF EXISTS user_to_history CASCADE;
 CREATE TABLE user_to_history
 (
-    user_id INT NOT NULL,
+    username INT NOT NULL,
     history_id INT NOT NULL
 );
