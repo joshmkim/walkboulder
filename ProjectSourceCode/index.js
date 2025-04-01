@@ -72,6 +72,11 @@ app.get('/', (req, res) =>
     res.render('pages/home')
 });
 
+app.get('/maps', (req, res) =>
+{
+  res.render('pages/maps')
+})
+
 
 // ----------------------- starting the server -----------------------
 
