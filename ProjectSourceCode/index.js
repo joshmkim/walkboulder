@@ -14,6 +14,7 @@ const axios = require('axios'); // To make HTTP requests from other APIs
 // ------------- connecting to DB and adding handlebars -------------------------------
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
+app.use(session({ secret: 'somevalue' }));
 const hbs = handlebars.create({
     extname: 'hbs',
     layoutsDir: __dirname + '/views/layouts',
@@ -83,3 +84,24 @@ app.get('/maps', (req, res) =>
 app.listen(3000);
 console.log('Server is listening on port 3000');
 
+
+
+// ----------------------- User Reviews -----------------------
+
+const reviews = [];
+
+function saveReview() {
+  let written_review = document.getElementById("written_review").value;
+  let trail = document.getElementById("trail").value;
+  let star_rating = document.getElementById("star_rating").value;
+
+  const reviewDetails = {
+      written_review: written_review,
+      trail: trail,
+      star_rating: star_rating
+  }
+
+  reviews.push(reviewDetails);
+  document.getElementById('review_modal').querySelector('form').reset();
+
+}
