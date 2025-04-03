@@ -17,6 +17,13 @@ CREATE TABLE history
     date VARCHAR(100) NOT_NULL
 );
 
+CREATE TABLE reviews (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+    written_review TEXT NOT NULL
+);
+
 DROP TABLE IF EXISTS trails_to_reviews CASCADE;
 CREATE TABLE trails_to_reviews 
 (

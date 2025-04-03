@@ -79,6 +79,19 @@ app.get('/maps', (req, res) =>
 })
 
 
+app.post('/submit-review', async (req, res) => {
+  const { name, rating, written_review } = req.body;
+
+  try {
+      await db.none('INSERT INTO reviews (name, rating, written_review) VALUES ($1, $2, $3)', 
+          [name, rating, written_review]);
+
+      res.status(200).json({ message: 'Review saved successfully' });
+  } catch (error) {
+      console.error('Error saving review:', error);
+      res.status(500).json({ error: 'Failed to save review' });
+  }
+});
 // ----------------------- starting the server -----------------------
 
 app.listen(3000);
@@ -88,20 +101,30 @@ console.log('Server is listening on port 3000');
 
 // ----------------------- User Reviews -----------------------
 
-const reviews = [];
 
 function saveReview() {
-  let written_review = document.getElementById("written_review").value;
-  let trail = document.getElementById("trail").value;
-  let star_rating = document.getElementById("star_rating").value;
+  document.getElementById('review_modal').addEventListener('submit', async function(event) {
+    event.preventDefault();
 
-  const reviewDetails = {
-      written_review: written_review,
-      trail: trail,
-      star_rating: star_rating
-  }
+    const name = document.getElementById("name").value;
+    const rating = document.getElementById("rating").value;
+    const written_review = document.getElementById("written_review").value;
 
-  reviews.push(reviewDetails);
-  document.getElementById('review_modal').querySelector('form').reset();
+    const reviewData = { name, rating, written_review };
+
+    const response = await fetch('/submit-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reviewData)
+    });
+
+    if (response.ok) {
+        alert('Review submitted successfully!');
+        this.reset();
+    } else {
+        alert('Failed to submit review.');
+    }
+});
 
 }
+
