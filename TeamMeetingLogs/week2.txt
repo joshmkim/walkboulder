@@ -1,0 +1,39 @@
+Thursday, April 3rd, 2025 at 3:45 pm - 4:06 pm
+  Decisions Made:
+    - The group decided that we would focus more on walking rather than general transportation, and also decided that we wanted to narrow the scope of our project
+    - Instead of creating our own map, our MVP is to now embed a google map onto the maps page, and then a route on top of the map
+    - Hoping to finish profile, maps, and reviews by next meeting
+
+  Follow-Up:
+    - Full integration of the profile page - Parth
+    - Integration of reviews with routes onto the profile page - Eddie
+    - Being able to create a route and embed that route onto the map using latitude and longitude + adding that route to the DB - Josh and Inaki
+    - Integrating a discover map page with walkscore data on it - John
+    - Implementing the group walks feature and being able to send route data to other users/friends 
+
+Team member check in:
+Isabelle:
+Last week - Worked on the database and made a create.sql. Unfortunately during one of the commits some of the tables were discarded. 
+This week - Trying to implement the group walks feature, being able to send data to other users/friends. Also working on a test for the create.sql and fixing the tables.
+
+Inaki:
+Last week - Was very sick unfortunately and could not work on very much, but worked on the DB a little as well
+This week - Working on the Google Maps API
+
+Parth:
+Last week - Worked a little on the login/logout/register. Josh's commit wasn't working completely so things were polished up on. Also added navbar functionality so that if users are logged in, certain pages show up, and if they aren't logged in only the maps and login show up.
+This week - Working on adding full functionality with the profile pages
+
+Eddie:
+Last week - Trying to make functionality to write a review, was trying to embed it onto the map.
+This week - After a walk is completed, that walk is instead added to their profile page and then they can add a review there. 
+
+Josh:
+Last week - Updated navbar to look more aethestic, created login/logout/register page. Also created a maps page to embed a google map onto the screen. 
+This week - Working on creating a route and embedding that route onto the map using the Google API
+
+John: 
+Last week - Changed the docker compose file and fixed an error in the create.sql file. Worked on implementing the walkscore API and set it up with postman to fetch data, but havent implemented it with the project yet
+This week - Wanting to integrate the walkscore API with the maps page and adding a route onto the map + also adding walkscore data like scores on a map.
+
+
