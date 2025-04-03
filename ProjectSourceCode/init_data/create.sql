@@ -1,3 +1,11 @@
+DROP TABLE IF EXISTS users;
+CREATE TABLE users
+(
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(30) NOT NULL,
+    password varchar(30) NOT NULL
+)
+
 DROP TABLE IF EXISTS achievements;
 CREATE TABLE achievements
 (
