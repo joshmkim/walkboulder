@@ -1,11 +1,11 @@
 ---------- TEST DISPLAYING THE THREE MOST RECENT WALKS ----------
-/* Creating Test Cases - Had to create the tables in postgres if trying to replicate test */
+/* Creating Test Cases - Had to create the (orignal, commented) tables in postgres if trying to replicate test */
 INSERT INTO history (history_id, start_location, end_location, buddy, date)
     VALUES
-    (1, '30th Street', 'Pearl Street', 'No Buddy', 2024-08-25),
-    (2, 'Laguna Pl', 'Williams Village', 'Helios', 2025-01-13),
-    (3, 'Inca Pkwy', 'Broadway', 'Minerva', 2025-02-28),
-    (4, 'Parker', 'Havana', 'Ceres', 2025-03-09);
+    (1, '30th Street', 'Pearl Street', 'No Buddy', '2024-08-25'),
+    (2, 'Laguna Pl', 'Williams Village', 'Helios', '2025-01-13'),
+    (3, 'Inca Pkwy', 'Broadway', 'Minerva', '2025-02-28'),
+    (4, 'Parker', 'Havana', 'Ceres', '2025-03-09');
 
 INSERT INTO user_to_history (user_id,  history_id)
     VALUES
