@@ -28,7 +28,7 @@ describe('Server running:', () => {
 });
 
 describe('Register', () => {
-    // Sample test case given to test / endpoint.
+    // Testing if register adds a user correctly 
     it('Adds user correctly', done => {
       chai
         .request(server)
@@ -39,6 +39,17 @@ describe('Register', () => {
           done();
         });
     });
+        //Testing if register throws the correct error if users are not added correctly
+        it('Throws correct error for username being too long', done=>{
+            chai
+            .request(server)
+            .post('/register')
+            .send({username: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', password: '12345'})
+            .end((err, res) =>{
+                expect(res).to.have.status(400);
+                done();
+            });
+        });
   });
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
