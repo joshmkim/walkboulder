@@ -99,7 +99,15 @@ app.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // 1. First check if user exists explicitly
+    // 1. Check if the username length exceeds 30 characters
+    if (username.length > 30) {
+      return res.status(400).render('pages/register', { 
+        message: 'Username cannot be longer than 30 characters', 
+        error: true 
+      });
+    }
+
+    // 2. Check if user already exists
     const userExists = await db.oneOrNone(
       'SELECT 1 FROM users WHERE username = $1', 
       [username]
@@ -112,14 +120,14 @@ app.post('/register', async (req, res) => {
       });
     }
 
-    // 2. Hash password and create user
+    // 3. Hash password and create user
     const hash = await bcrypt.hash(password, 12); // Increased salt rounds
     await db.none(
       'INSERT INTO users (username, password) VALUES ($1, $2)',
       [username, hash]
     );
 
-    // 3. Auto-login after registration
+    // 4. Auto-login after registration
     const newUser = await db.one(
       'SELECT * FROM users WHERE username = $1',
       [username]
@@ -146,6 +154,7 @@ app.post('/register', async (req, res) => {
     });
   }
 });
+
 
 // login
 
