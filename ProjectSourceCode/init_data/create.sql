@@ -31,7 +31,7 @@ DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users
 (
     user_id SERIAL PRIMARY KEY NOT NULL,
-    username VARCHAR(50) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
     password VARCHAR(60) NOT NULL,
     total_distance SERIAL NOT NULL,
     about VARCHAR(200) NOT NULL
@@ -49,11 +49,10 @@ DROP TABLE IF EXISTS history CASCADE;
 CREATE TABLE history
 (
     history_id SERIAL NOT NULL,
-    location VARCHAR(100) NOT_NULL,
-    start_location VARCHAR(100) NOT_NULL,
-    end_location VARCHAR(100) NOT_NULL,
-    buddy VARCHAR(100) NOT_NULL,
-    date VARCHAR(100) NOT_NULL
+    start_location VARCHAR(100) NOT NULL,
+    end_location VARCHAR(100) NOT NULL,
+    buddy VARCHAR(100) NOT NULL,
+    date DATE
 );
 
 DROP TABLE IF EXISTS trails_to_reviews CASCADE;
