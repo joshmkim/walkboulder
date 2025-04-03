@@ -30,18 +30,23 @@
           <li class="nav-item">
             <a class="nav-link fw-medium" href="/maps">Maps</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/profile">Profile</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/settings">Settings</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/login">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/logout">Logout</a>
-          </li>
+          {{#if user}}
+            <!-- Show these when logged in -->
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/profile">Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/settings">Settings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/logout">Logout</a>
+            </li>
+          {{else}}
+            <!-- Show these when logged out -->
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/login">Login</a>
+            </li>
+          {{/if}}
         </ul>
       </div>
 

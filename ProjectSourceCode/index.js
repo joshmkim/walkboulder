@@ -50,6 +50,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
 
 // initialize session variables
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -57,6 +58,11 @@ app.use(
     resave: false,
   })
 );
+
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
 
 app.use(
   bodyParser.urlencoded({
@@ -87,20 +93,53 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-      // Hash the password using bcrypt
-      const hash = await bcrypt.hash(req.body.password, 10);
-      const username = req.body.username; 
+    const { username, password } = req.body;
 
-      // Insert username and hashed password into the 'users' table
-      const query = 'INSERT INTO users (username, password) VALUES ($1, $2)';
-      await db.query(query, [username, hash]); 
+    // 1. First check if user exists explicitly
+    const userExists = await db.oneOrNone(
+      'SELECT 1 FROM users WHERE username = $1', 
+      [username]
+    );
 
-      return res.render('pages/register', {message: 'User registered successfully', error:false});
-  } 
-  catch (error) 
-  {
-      console.error(error);
-      return res.render('pages/register', {message: 'User already registered', error:true});
+    if (userExists) {
+      return res.render('pages/register', {
+        message: 'Username already taken',
+        error: true
+      });
+    }
+
+    // 2. Hash password and create user
+    const hash = await bcrypt.hash(password, 12); // Increased salt rounds
+    await db.none(
+      'INSERT INTO users (username, password) VALUES ($1, $2)',
+      [username, hash]
+    );
+
+    // 3. Auto-login after registration
+    const newUser = await db.one(
+      'SELECT * FROM users WHERE username = $1',
+      [username]
+    );
+    
+    req.session.user = newUser;
+    return res.redirect('/');
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    
+    // Specific error for unique violation
+    if (error.code === '23505') {
+      return res.render('pages/register', {
+        message: 'Username already taken',
+        error: true
+      });
+    }
+    
+    // Generic error for other cases
+    return res.render('pages/register', {
+      message: 'Registration failed. Please try again.',
+      error: true
+    });
   }
 });
 
