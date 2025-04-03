@@ -77,8 +77,78 @@ app.get('/maps', (req, res) =>
   res.render('pages/maps')
 })
 
+// ---------- LOGIN/LOGOUT/REGISTER ----------------------------------------
+
+//register 
+
+app.get('/register', (req, res) => {
+  res.render('pages/register')
+});
+
+app.post('/register', async (req, res) => {
+  try {
+      // Hash the password using bcrypt
+      const hash = await bcrypt.hash(req.body.password, 10);
+      const username = req.body.username; 
+
+      // Insert username and hashed password into the 'users' table
+      const query = 'INSERT INTO users (username, password) VALUES ($1, $2)';
+      await db.query(query, [username, hash]); 
+
+      return res.render('pages/register', {message: 'User registered successfully', error:false});
+  } 
+  catch (error) 
+  {
+      console.error(error);
+      return res.render('pages/register', {message: 'User already registered', error:true});
+  }
+});
+
+// login
+
+app.get('/login', (req, res) => {
+  res.render('pages/login')
+});
+
+app.post('/login', async (req, res) => {
+  const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username,]);
+  if (!user) 
+  {
+      return res.render('pages/login', {message: 'Incorrect username or password.',error: true,});
+  }
+  const match = await bcrypt.compare(req.body.password, user.password);
+  if (!match) 
+  {
+      return res.render('pages/login', {message: 'Incorrect username or password.',error: true,});
+  }
+  req.session.user = user;
+  req.session.save();
+  res.redirect('/');
+});
+  
+const auth = (req, res, next) => {
+if (!req.session.user) {
+return res.redirect('/login');
+}
+next();
+};
+
+// logout
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+      if (err) {
+          return res.render('/', {message: 'Logout was not successful',error: true,});
+      }
+      return res.render('pages/logout', {message: 'Logout was successful!',error: false});
+  });
+});
+
+// Authentication Required
+app.use(auth); // I would advise putting routes like reviews and group walks AFTER this auth as I think users should have to login before they are allowed to post reviews or go on group walks
 
 // ----------------------- starting the server -----------------------
+
 
 app.listen(3000);
 console.log('Server is listening on port 3000');
