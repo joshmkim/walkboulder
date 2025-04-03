@@ -72,6 +72,10 @@ app.use(
 
 // --------------------- put APIs here --------------------------------------
 
+app.get('/welcome', (req, res) => {
+  res.json({status: 'success', message: 'Welcome!'});
+});
+
 
 app.get('/', (req, res) =>
 {
@@ -189,6 +193,8 @@ app.use(auth); // I would advise putting routes like reviews and group walks AFT
 // ----------------------- starting the server -----------------------
 
 
-app.listen(3000);
-console.log('Server is listening on port 3000');
+const server = app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
 
+module.exports = server;
