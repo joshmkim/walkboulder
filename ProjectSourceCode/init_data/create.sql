@@ -141,7 +141,6 @@ CREATE TABLE achievements (
 
 CREATE TABLE history (
     history_id SERIAL PRIMARY KEY,
-    location VARCHAR(100) NOT NULL,
     start_location VARCHAR(100) NOT NULL,
     end_location VARCHAR(100) NOT NULL,
     buddy VARCHAR(100) NOT NULL,
