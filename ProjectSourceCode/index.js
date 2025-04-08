@@ -78,6 +78,10 @@ app.get('/maps', (req, res) =>
   res.render('pages/maps')
 })
 
+app.get('/reviews', (req, res) =>
+  {
+    res.render('pages/reviews')
+  })
 
 app.post('/submit-review', async (req, res) => {
   const { name, rating, written_review } = req.body;
