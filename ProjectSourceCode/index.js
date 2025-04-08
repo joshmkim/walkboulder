@@ -14,7 +14,7 @@ const axios = require('axios'); // To make HTTP requests from other APIs
 // ------------- connecting to DB and adding handlebars -------------------------------
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
-app.use(session({ secret: 'somevalue' }));
+// app.use(session({ secret: 'somevalue' }));
 const hbs = handlebars.create({
     extname: 'hbs',
     layoutsDir: __dirname + '/views/layouts',
@@ -96,14 +96,7 @@ app.post('/submit-review', async (req, res) => {
       res.status(500).json({ error: 'Failed to save review' });
   }
 });
-// ----------------------- starting the server -----------------------
 
-app.listen(3000);
-console.log('Server is listening on port 3000');
-
-
-
-// ----------------------- User Reviews -----------------------
 
 
 function saveReview() {
@@ -131,4 +124,39 @@ function saveReview() {
 });
 
 }
+// ----------------------- starting the server -----------------------
+
+app.listen(3000);
+console.log('Server is listening on port 3000');
+
+
+
+// ----------------------- User Reviews -----------------------
+
+
+// function saveReview() {
+//   document.getElementById('review_modal').addEventListener('submit', async function(event) {
+//     event.preventDefault();
+
+//     const name = document.getElementById("name").value;
+//     const rating = document.getElementById("rating").value;
+//     const written_review = document.getElementById("written_review").value;
+
+//     const reviewData = { name, rating, written_review };
+
+//     const response = await fetch('/submit-review', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(reviewData)
+//     });
+
+//     if (response.ok) {
+//         alert('Review submitted successfully!');
+//         this.reset();
+//     } else {
+//         alert('Failed to submit review.');
+//     }
+// });
+
+// }
 
