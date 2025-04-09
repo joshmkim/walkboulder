@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>WalkBoulder Maps</title>
+  <style>
+    body {
+      margin: 0;
+      position: relative;
+      height: 10vh;
+    }
+    .form-container {
+      width: 25%;
+      margin-left: 2.5vw;
+      margin-top: 8vh;
+      padding: 2vw;
+      background-color: #f4f4f4;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .map-container {
+      margin-top: 8vh;
+      margin-right: 2.5vw;
+      width: 60vw;
+      height: 60vh;
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    input, button {
+      margin-top: 2vh;
+      padding: 2vw;
+      width: 20vw;
+      height: 5vh;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    body::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="form-container">
+    <h3>Create a route!</h3>
+    <form>
+      <input type="text" id="start" name="start" placeholder="Starting Location" required>
+      <input type="text" id="destination" name="destination" placeholder="Ending Location" required>
+      <button type="submit">Get Route</button>
+    </form>
+  </div>
+  <div class="map-container">
+      <iframe 
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d97767.33201232801!2d-105.23990249999999!3d40.02566354999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x876b8d4e278dafd3%3A0xc8393b7ca01b8058!2sBoulder%2C%20CO!5e0!3m2!1sen!2sus!4v1743648002327!5m2!1sen!2sus"
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+  </div>
