@@ -1,4 +1,3 @@
-/* ASK TA HOW TO SET UP THE users TABLE SO THAT I CAN SET UP FRIENDS */
 ---------- TEST LINKING THE SAME TABLE ----------
 /* Creating Test Cases - Had to create the tables in postgres if trying to replicate test */
 INSERT INTO users (user_id, username, password) 
