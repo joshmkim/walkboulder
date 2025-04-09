@@ -397,7 +397,7 @@
         background: #fff;
         border-radius: 4px;
         box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px rgba(0, 0, 0, 0.14), 0 1px 10px rgba(0, 0, 0, 0.12);
-        height: 256px;
+        height: 360px;
         position: absolute;
         width: 360px;
       }
@@ -652,7 +652,7 @@
             <svg aria-label="Add Icon" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg">
               <use href="#commutes-add-icon"/>
             </svg>
-            <span class="label">Add destination</span>
+            <span class="label">Add route</span>
           </button>
         </div>
 
@@ -663,7 +663,7 @@
               <svg aria-label="Add Icon" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg">
                 <use href="#commutes-add-icon"/>
               </svg>
-              <div class="label">Add destination</div>
+              <div class="label">Add route</div>
             </button>
           </div>
           <button class="left-control hide" data-direction="-1" aria-label="Scroll left">
@@ -683,9 +683,24 @@
     <div class="commutes-modal-container">
       <div class="commutes-modal" role="dialog" aria-modal="true" aria-labelledby="add-edit-heading">
         <div class="content">
-          <h2 id="add-edit-heading" class="heading">Add destination</h2>
+          <h2 id="add-edit-heading" class="heading">Add route</h2>
           <form id="destination-form">
-            <input type="text" id="destination-address-input" name="destination-address" placeholder="Enter a place or address" autocomplete="off" required>
+
+
+
+
+  <div class="location-input-group">
+    <label for="start-address-input">Start location</label>
+    <input type="text" id="start-address-input" name="start-address" placeholder="Enter full address" autocomplete="on" required>
+  </div>
+  <div class="location-input-group">
+    <label for="destination-address-input">Destination</label>
+    <input type="text" id="destination-address-input" name="destination-address" placeholder="Enter a place or address" autocomplete="off" required>
+  </div>
+
+
+
+
             <div class="error-message" role="alert"></div>
             <div class="travel-modes">
               <input type="radio" name="travel-mode" id="driving-mode" value="DRIVING" aria-label="Driving travel mode">
@@ -952,7 +967,7 @@
         const addCommutesButtonEls = document.querySelectorAll('.add-button');
         addCommutesButtonEls.forEach(addButton => {
           addButton.addEventListener('click', () => {
-            destinationModalEl.title.innerHTML = 'Add destination';
+            destinationModalEl.title.innerHTML = 'Add route';
             hideElement(destinationModalEl.deleteButton);
             hideElement(destinationModalEl.editButton);
             showElement(destinationModalEl.addButton);
@@ -1331,6 +1346,14 @@
        * update commutes panel with distance and directions info.
        */
       function getDirections(destination) {
+        const startInput = document.getElementById('start-address-input');
+        const startPlace = startInput.value.trim();
+        
+        origin = startPlace ? startPlace : origin;
+
+        console.log(origin);
+        console.log(destination);
+
         const request = {
           origin: origin,
           destination: {'placeId': destination.place_id},
@@ -1338,6 +1361,7 @@
           unitSystem: configuration.distanceMeasurementType === 'METRIC' ?
                   google.maps.UnitSystem.METRIC : google.maps.UnitSystem.IMPERIAL,
         };
+
         const directionsService = new google.maps.DirectionsService();
         return directionsService.route(request).then(response => {
           return response;
