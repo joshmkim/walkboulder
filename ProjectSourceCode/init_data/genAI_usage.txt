@@ -1,0 +1,59 @@
+"SELECT
+    u1.username AS walker,
+    h.start_location,
+    h.end_location,
+    CASE
+        WHEN u2.username IS NOT NULL THEN u2.username
+        ELSE h.buddy
+    END AS buddy,
+    h.date
+FROM user_to_history uth1
+JOIN users u1 ON uth1.username = u1.user_id
+JOIN history h ON uth1.history_id = h.history_id
+LEFT JOIN user_to_history uth2
+    ON uth1.history_id = uth2.history_id
+    AND uth2.username != uth1.username  -- the other person on the same walk
+LEFT JOIN users u2 ON uth2.username = u2.user_id
+ORDER BY h.date;"
+    - How do you change the buddy name to the other walker?
+
+"SELECT
+    DISTINCT u_other.username AS walker,
+    h.start_location,
+    h.end_location,
+    h.date
+FROM user_to_history uth_target
+JOIN users u_target ON uth_target.username = u_target.user_id
+JOIN user_to_history uth_other
+    ON uth_target.history_id = uth_other.history_id
+    AND uth_other.username != uth_target.username
+JOIN users u_other ON uth_other.username = u_other.user_id
+JOIN history h ON uth_target.history_id = h.history_id
+WHERE u_target.username = 'Minerva'
+ORDER BY h.date DESC
+LIMIT 3;"
+    - What if I wanted the query to only have those who have walked with a certain person restricted to the 3 most recent?
+
+"CREATE OR REPLACE FUNCTION make_friendship_mutual()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check if the mirror row already exists
+    IF NOT EXISTS (
+        SELECT 1 FROM user_to_friend
+        WHERE username = NEW.friend_id AND friend_id = NEW.username
+    ) THEN
+        -- Insert the mirror row
+        INSERT INTO user_to_friend (username, friend_id)
+        VALUES (NEW.friend_id, NEW.username);
+    END IF;
+
+    RETURN NEW; -- Finish the trigger
+END;
+$$ LANGUAGE plpgsql;
+
+-- Then attach the function to the table with a trigger
+CREATE TRIGGER mutual_friendship
+AFTER INSERT ON user_to_friend
+FOR EACH ROW
+EXECUTE FUNCTION make_friendship_mutual();"
+    - What ways are there to make adding friends a two-ways relationship?

@@ -10,7 +10,7 @@ INSERT INTO user_to_friend (username, friend_id)
     (1,2),
     (2,1);
 
-/* SQL INPUT */
+/* TESTING TO DISPLAY FRIEND LIST */
 SELECT
     users.username
 FROM 

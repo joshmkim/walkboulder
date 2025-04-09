@@ -19,7 +19,7 @@ INSERT INTO user_to_history (username,  history_id)
     (1,3),
     (1,4);
 
-/* SQL INPUT */
+/* TESTING TO SHOW THE THREE MOST RECENT WALKS OF A USER */
 SELECT
     history.date,
     history.buddy

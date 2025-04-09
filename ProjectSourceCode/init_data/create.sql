@@ -200,3 +200,24 @@ CREATE TABLE user_to_history (
     FOREIGN KEY (history_id) REFERENCES history (history_id) ON DELETE CASCADE,
     PRIMARY KEY (username, history_id)
 );
+
+-- Creating a Trigger Function in order to add friends as a two-way relationship
+CREATE OR REPLACE FUNCTION make_friendship_mutual()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM user_to_friend
+        WHERE username = NEW.friend_id AND friend_id = NEW.username
+    ) THEN
+        INSERT INTO user_to_friend (username, friend_id)
+        VALUES (NEW.friend_id, NEW.username);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+    -- The trigger itself
+CREATE TRIGGER mutual_friendship
+AFTER INSERT ON user_to_friend
+FOR EACH ROW
+EXECUTE FUNCTION make_friendship_mutual();
