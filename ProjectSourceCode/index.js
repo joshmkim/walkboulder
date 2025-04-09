@@ -77,6 +77,8 @@ app.get('/welcome', (req, res) => {
 });
 
 
+// Google Maps API key AIzaSyBFJWukbwIMrbF7mwJFtuY06XHvlvF95I4
+
 app.get('/', (req, res) =>
 {
     res.render('pages/home')
