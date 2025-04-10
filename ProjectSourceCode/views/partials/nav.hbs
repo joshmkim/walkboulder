@@ -1,44 +1,58 @@
 <header>
- <nav class="navbar navbar-expand-sm border-bottom">
-   <div class="container">
-     <button
-       class="navbar-toggler ms-auto"
-       type="button"
-       data-bs-toggle="collapse"
-       data-bs-target="#navbar-collapse"
-       aria-controls="navbar"
-       aria-expanded="false"
-       aria-label="Toggle navigation">
-       <span class="navbar-toggler-icon"></span>
-     </button>
-     <div class="collapse navbar-collapse" id="navbar-collapse">
+  <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom shadow-sm">
+    <div class="container">
 
-       <ul class="navbar-nav me-auto">
-         <li class="nav-item">
-          <a class="nav-link" href = "/">Home</a>
-         </li>
-       </ul>
+      <!-- Sitename -->
+      <a class="navbar-brand fw-bold">WalkBoulder</a>
 
+      <!-- Navbar Toggler -->
+      <button 
+        class="navbar-toggler" 
+        type="button" 
+        data-bs-toggle="collapse" 
+        data-bs-target="#navbar-collapse" 
+        aria-controls="navbar-collapse" 
+        aria-expanded="false" 
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-        <div class="nav-item me-1">
-          <a class="nav-link" href = "/maps">Maps</a>
-       </div>
+      <!-- Home Link -->
+      <div class="collapse navbar-collapse" id="navbar-collapse">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link fw-medium" href="/">Home</a>
+          </li>
+        </ul>
 
-       <div class="nav-item me-1">
-          <a class="nav-link" href = "/reviews">Reviews</a>
-       </div>
+        <!-- Right side Links -->
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link fw-medium" href="/maps">Maps</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fw-medium" href="/reviews">Reviews</a>
+          </li>
+          {{#if user}}
+            <!-- Show these when logged in -->
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/profile">Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/settings">Settings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/logout">Logout</a>
+            </li>
+          {{else}}
+            <!-- Show these when logged out -->
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/login">Login</a>
+            </li>
+          {{/if}}
+        </ul>
+      </div>
 
-
-       <div class="nav-item me-1">
-          <a class="nav-link" href = "/Profile">Profile</a>
-       </div>
-       
-
-       <div class="nav-item me-1">
-          <a class="nav-link" href = "/settings">Settings</a>
-       </div>
-
-     </div>
-   </div>
- </nav>
+    </div>
+  </nav>
 </header>

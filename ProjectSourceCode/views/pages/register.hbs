@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Register</title>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h2 class="text-center">Register</h2>
+        {{> message}}
+        <form action="/register" method="POST" class="mt-4">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username:</label>
+                <input type="username" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -14,7 +14,6 @@ const axios = require('axios'); // To make HTTP requests from other APIs
 // ------------- connecting to DB and adding handlebars -------------------------------
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
-// app.use(session({ secret: 'somevalue' }));
 const hbs = handlebars.create({
     extname: 'hbs',
     layoutsDir: __dirname + '/views/layouts',
@@ -51,6 +50,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
 
 // initialize session variables
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -59,6 +59,11 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
+
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -66,6 +71,10 @@ app.use(
 );
 
 // --------------------- put APIs here --------------------------------------
+
+app.get('/welcome', (req, res) => {
+  res.json({status: 'success', message: 'Welcome!'});
+});
 
 
 app.get('/', (req, res) =>
@@ -78,19 +87,159 @@ app.get('/maps', (req, res) =>
   res.render('pages/maps')
 })
 
-app.get('/reviews', (req, res) =>
-  {
-    res.render('pages/reviews')
-  })
+// ---------- LOGIN/LOGOUT/REGISTER ----------------------------------------
 
+//register 
+
+app.get('/register', (req, res) => {
+  res.render('pages/register')
+});
+
+app.post('/register', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // 1. Check if the username length exceeds 30 characters
+    if (username.length > 30) {
+      return res.status(400).render('pages/register', { 
+        message: 'Username cannot be longer than 30 characters', 
+        error: true 
+      });
+    }
+
+    // 2. Check if user already exists
+    const userExists = await db.oneOrNone(
+      'SELECT 1 FROM users WHERE username = $1', 
+      [username]
+    );
+
+    if (userExists) {
+      return res.render('pages/register', {
+        message: 'Username already taken',
+        error: true
+      });
+    }
+
+    // 3. Hash password and create user
+    const hash = await bcrypt.hash(password, 12); // Increased salt rounds
+    await db.none(
+      'INSERT INTO users (username, password) VALUES ($1, $2)',
+      [username, hash]
+    );
+
+    // 4. Auto-login after registration
+    const newUser = await db.one(
+      'SELECT * FROM users WHERE username = $1',
+      [username]
+    );
+    
+    req.session.user = newUser;
+    return res.redirect('/');
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    
+    // Specific error for unique violation
+    if (error.code === '23505') {
+      return res.render('pages/register', {
+        message: 'Username already taken',
+        error: true
+      });
+    }
+    
+    // Generic error for other cases
+    return res.render('pages/register', {
+      message: 'Registration failed. Please try again.',
+      error: true
+    });
+  }
+});
+
+
+// login
+
+app.get('/login', (req, res) => {
+  res.render('pages/login')
+});
+
+app.post('/login', async (req, res) => {
+  const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username,]);
+  if (!user) 
+  {
+      return res.render('pages/login', {message: 'Incorrect username or password.',error: true,});
+  }
+  const match = await bcrypt.compare(req.body.password, user.password);
+  if (!match) 
+  {
+      return res.render('pages/login', {message: 'Incorrect username or password.',error: true,});
+  }
+  req.session.user = user;
+  req.session.save();
+  res.redirect('/');
+});
+  
+const auth = (req, res, next) => {
+if (!req.session.user) {
+return res.redirect('/login');
+}
+next();
+};
+
+// logout
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+      if (err) {
+          return res.render('/', {message: 'Logout was not successful',error: true,});
+      }
+      return res.render('pages/logout', {message: 'Logout was successful!',error: false});
+  });
+});
+
+// Authentication Required
+app.use(auth); // I would advise putting routes like reviews and group walks AFTER this auth as I think users should have to login before they are allowed to post reviews or go on group walks
+
+// app.get('/reviews', (req, res) =>
+//   {
+//     res.render('pages/reviews')
+//     console.log("hello");
+//   })
+
+  app.get('/reviews', async (req, res) => {
+    const { trail_name, rating, written_review } = req.body;
+    const userId = req.session.user.user_id;
+    try {
+        // Fetch all reviews from the database
+        const result = await db.any(`
+          SELECT reviews.review_id, reviews.trail_name, reviews.rating, reviews.written_review, users.username
+          FROM reviews
+          JOIN users_to_reviews ON reviews.review_id = users_to_reviews.review_id
+          JOIN users ON users_to_reviews.user_id = users.user_id;
+        `);
+        // If no reviews exist, result.rows will be an empty array
+        // const reviews = result.rows;
+        console.log('results:', result);
+        // Render the reviews page with the reviews data (empty array if no reviews)
+        res.render('pages/reviews', { result });
+    } catch (error) {
+        console.error('Error fetching reviews:', error);
+        res.status(500).send('Error fetching reviews');
+    }
+});
 app.post('/submit-review', async (req, res) => {
-  const { name, rating, written_review } = req.body;
+  console.log(req.body);  // This will show the data being submitted from the form
+  const { trail_name, rating, written_review } = req.body;
+  console.log('Review Data:', { trail_name, rating, written_review });  // Log review data
+
 
   try {
-      await db.none('INSERT INTO reviews (name, rating, written_review) VALUES ($1, $2, $3)', 
-          [name, rating, written_review]);
+      await db.query('INSERT INTO reviews (trail_name, rating, written_review, userId) VALUES ($1, $2, $3,$4)',
+          [trail_name, rating, written_review,userId]);
+          console.log('Review Data:', { trail_name, rating, written_review });  // Log review data
 
-      res.status(200).json({ message: 'Review saved successfully' });
+          res.redirect('/reviews');
+
+      // res.status(200).json({ message: 'Review saved successfully' });
   } catch (error) {
       console.error('Error saving review:', error);
       res.status(500).json({ error: 'Failed to save review' });
@@ -99,64 +248,11 @@ app.post('/submit-review', async (req, res) => {
 
 
 
-function saveReview() {
-  document.getElementById('review_modal').addEventListener('submit', async function(event) {
-    event.preventDefault();
-
-    const name = document.getElementById("name").value;
-    const rating = document.getElementById("rating").value;
-    const written_review = document.getElementById("written_review").value;
-
-    const reviewData = { name, rating, written_review };
-
-    const response = await fetch('/submit-review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reviewData)
-    });
-
-    if (response.ok) {
-        alert('Review submitted successfully!');
-        this.reset();
-    } else {
-        alert('Failed to submit review.');
-    }
-});
-
-}
 // ----------------------- starting the server -----------------------
 
-app.listen(3000);
-console.log('Server is listening on port 3000');
 
+const server = app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
 
-
-// ----------------------- User Reviews -----------------------
-
-
-// function saveReview() {
-//   document.getElementById('review_modal').addEventListener('submit', async function(event) {
-//     event.preventDefault();
-
-//     const name = document.getElementById("name").value;
-//     const rating = document.getElementById("rating").value;
-//     const written_review = document.getElementById("written_review").value;
-
-//     const reviewData = { name, rating, written_review };
-
-//     const response = await fetch('/submit-review', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(reviewData)
-//     });
-
-//     if (response.ok) {
-//         alert('Review submitted successfully!');
-//         this.reset();
-//     } else {
-//         alert('Failed to submit review.');
-//     }
-// });
-
-// }
-
+module.exports = server;
