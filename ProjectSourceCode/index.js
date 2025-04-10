@@ -10,6 +10,8 @@ const bodyParser = require('body-parser');
 const session = require('express-session'); // setting session object to allow user session through a login.
 const bcrypt = require('bcryptjs'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from other APIs
+const multer = require('multer');
+
 
 // ------------- connecting to DB and adding handlebars -------------------------------
 
@@ -72,6 +74,12 @@ app.use(
 
 // --------------------- put APIs here --------------------------------------
 
+app.get('/welcome', (req, res) => {
+  res.json({status: 'success', message: 'Welcome!'});
+});
+
+
+// Google Maps API key AIzaSyBFJWukbwIMrbF7mwJFtuY06XHvlvF95I4
 
 app.get('/', (req, res) =>
 {
@@ -95,7 +103,15 @@ app.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // 1. First check if user exists explicitly
+    // 1. Check if the username length exceeds 30 characters
+    if (username.length > 30) {
+      return res.status(400).render('pages/register', { 
+        message: 'Username cannot be longer than 30 characters', 
+        error: true 
+      });
+    }
+
+    // 2. Check if user already exists
     const userExists = await db.oneOrNone(
       'SELECT 1 FROM users WHERE username = $1', 
       [username]
@@ -108,14 +124,14 @@ app.post('/register', async (req, res) => {
       });
     }
 
-    // 2. Hash password and create user
+    // 3. Hash password and create user
     const hash = await bcrypt.hash(password, 12); // Increased salt rounds
     await db.none(
       'INSERT INTO users (username, password) VALUES ($1, $2)',
       [username, hash]
     );
 
-    // 3. Auto-login after registration
+    // 4. Auto-login after registration
     const newUser = await db.one(
       'SELECT * FROM users WHERE username = $1',
       [username]
@@ -143,6 +159,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
+
 // login
 
 app.get('/login', (req, res) => {
@@ -150,7 +167,7 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-  const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username,]);
+  const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);
   if (!user) 
   {
       return res.render('pages/login', {message: 'Incorrect username or password.',error: true,});
@@ -183,12 +200,94 @@ app.get('/logout', (req, res) => {
   });
 });
 
+
+
 // Authentication Required
 app.use(auth); // I would advise putting routes like reviews and group walks AFTER this auth as I think users should have to login before they are allowed to post reviews or go on group walks
+
+// --------------------------------------- PROFILE ENDPOINTS ------------------------------------------------------------------
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.get('/profile', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
+  const user = req.session.user;
+  const userData = {
+    name: user.username,
+    avatar: `/avatar/${user.user_id}`,
+    bio: user.bio || "This user hasn’t written a bio yet."
+  };
+
+  res.render('pages/profile', { userData });
+});
+
+// Uploading avatars
+app.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
+  try {
+    const userId = req.session.user?.user_id;
+    if (!userId) {
+      return res.status(401).send('Unauthorized');
+    }
+
+    if (!req.file) {
+      return res.status(400).send('No file uploaded.');
+    }
+
+    const avatarBuffer = req.file.buffer;
+
+    await db.query(
+      'UPDATE users SET avatar = $1 WHERE user_id = $2',
+      [avatarBuffer, userId]
+    );
+
+    const updatedUser = await db.one(
+      'SELECT * FROM users WHERE user_id = $1',
+      [userId]
+    );
+    req.session.user = updatedUser;
+
+    res.redirect('/profile');
+  } catch (err) {
+    res.status(500).send('Server error while uploading avatar.');
+  }
+});
+
+// Fetching avatars
+const FileType = require('file-type');
+app.get('/avatar/:userId', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    const rows = await db.any('SELECT avatar FROM users WHERE user_id = $1', [userId]);
+
+    if (!rows.length || !rows[0].avatar) {
+      return res.redirect('https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg');
+    }
+
+    const avatarBuffer = rows[0].avatar;
+
+    const fileType = await FileType.fromBuffer(avatarBuffer);
+    res.set('Content-Type', fileType?.mime || 'application/octet-stream');
+    res.send(avatarBuffer);
+  } catch (err) {
+    res.status(500).send('Server error.');
+  }
+});
+
+
+
+
+
+
+
 
 // ----------------------- starting the server -----------------------
 
 
-app.listen(3000);
-console.log('Server is listening on port 3000');
+const server = app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
 
+module.exports = server;

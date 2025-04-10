@@ -14,13 +14,14 @@ services:
     env_file: .env
     environment:
       - NODE_ENV=development
+      - SESSION_SECRET=${SESSION_SECRET}
     depends_on:
       - db
     ports:
       - '3000:3000'
     volumes:
       - ./:/home/node/app
-    command: 'npm start'
+    command: 'npm run testandrun'
 
 volumes:
   walkboulder:
