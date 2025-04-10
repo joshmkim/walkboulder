@@ -18,8 +18,11 @@ const hbs = handlebars.create({
     extname: 'hbs',
     layoutsDir: __dirname + '/views/layouts',
     partialsDir: __dirname + '/views/partials',
+
   });
   
+  app.use(express.static(path.join(__dirname, '/walkboulder/ProjectSourceCode/views/styles')));
+
   // database configuration
   const dbConfig = {
     host: 'db', // the database server
