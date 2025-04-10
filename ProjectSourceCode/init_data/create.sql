@@ -160,4 +160,3 @@ CREATE TRIGGER mutual_friendship
 AFTER INSERT ON user_to_friend
 FOR EACH ROW
 EXECUTE FUNCTION make_friendship_mutual();
-);
