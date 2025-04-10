@@ -289,16 +289,99 @@ app.get('/settings', (req, res) => {
     avatar: `/avatar/${user.user_id}`,
     bio: user.bio || "This user hasn’t written a bio yet.",
     password: user.password,
-    email: user.email || "No email on record",
-    firstname: user.firstname || "No first name on record.",
-    lastname: user.lastname || "No last name on record."
-
-
-
+    email: user.email || "",
+    firstname: user.firstname || "",
+    lastname: user.lastname || ""
   };
 
   res.render('pages/settings', {userData});
 });
+
+app.post('/settings', async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
+  const {
+    username,
+    firstname,
+    lastname,
+    email,
+    currentPassword,
+    newPassword,
+    confirmPassword
+  } = req.body;
+
+  try {
+    const userId = req.session.user.user_id;
+
+    // Get latest session user from DB for fresh state
+    const currentUser = await db.one('SELECT * FROM users WHERE user_id = $1', [userId]);
+
+    // Check if password update is requested
+    if (newPassword || confirmPassword) {
+      if (!currentPassword) {
+        return res.render('pages/settings', {
+          userData: currentUser,
+          message: 'Please enter your current password.',
+          error: true
+        });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, currentUser.password);
+      if (!isMatch) {
+        return res.render('pages/settings', {
+          userData: currentUser,
+          message: 'Current password is incorrect.',
+          error: true
+        });
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.render('pages/settings', {
+          userData: currentUser,
+          message: 'New passwords do not match.',
+          error: true
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      await db.none('UPDATE users SET password = $1 WHERE user_id = $2', [hashedPassword, userId]);
+    }
+
+    await db.none(
+      `UPDATE users 
+       SET username = $1, firstname = $2, lastname = $3, email = $4 
+       WHERE user_id = $5`,
+      [username, firstname, lastname, email, userId]
+    );
+
+    const updatedUser = await db.one('SELECT * FROM users WHERE user_id = $1', [userId]);
+    req.session.user = updatedUser;
+
+    res.render('pages/settings', {
+      userData: {
+        ...updatedUser,
+        avatar: `/avatar/${updatedUser.user_id}`,
+        bio: updatedUser.bio || "This user hasn’t written a bio yet."
+      },
+      message: 'Settings updated successfully!',
+      error: false
+    });
+    
+
+  } catch (err) {
+    console.error(err);
+    res.render('pages/settings', {
+      userData: req.session.user,
+      message: 'Something went wrong updating your settings.',
+      error: true
+    });
+  }
+});
+
+
+
 
 
 

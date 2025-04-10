@@ -18,12 +18,14 @@
     border: 1px solid #ccc;
   }
 
-  .avatar {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    margin-bottom: 1rem;
-  }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      margin: 0 auto;
+      border-radius: 50%;
+      display: block;
+    }
 
   h2 {
     font-size: 1.5rem;
@@ -36,17 +38,19 @@
     color: #555;
   }
 
-  .custom-btn {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    background-color: black;
-    color: white;
-    border: 1px solid black;
-    text-decoration: none;
-    margin: 0 0.5rem;
-    cursor: pointer;
-  }
+    .custom-btn {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      font-size: 0.95rem;
+      background-color: #000;
+      color: white;
+      border: 1px solid #000;
+      border-radius: 5px;
+      text-decoration: none;
+      margin-top: 0.3rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
 
   .custom-btn:hover {
     background-color: #333;
@@ -67,7 +71,7 @@
   <div class="container text-center">
     <div class="profile-card">
       <!-- Avatar Image -->
-      <img src="{{userData.avatar}}" alt="Profile picture" class="avatar mx-auto d-block" id="avatarPreview">
+        <img src="{{userData.avatar}}" alt="Profile picture" class="avatar" id="avatarPreview">
 
       <!-- User Name -->
       <h2>{{userData.name}}</h2>

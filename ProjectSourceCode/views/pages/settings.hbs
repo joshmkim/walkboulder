@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{{> message message=message error=error }}
 <head>
   <meta charset="UTF-8">
   <title>Settings</title>
@@ -87,16 +88,23 @@
     }
 
     .save-btn {
-      background-color: #d9c6f4;
-      color: #fff;
-      border: none;
-      margin-top: 1.5rem;
-      padding: 0.5rem 1.5rem;
-      border-radius: 5px;
-      font-weight: 500;
-      cursor: not-allowed;
+    background-color: #e2d4f7; 
+    color: #fff;
+    border: none;
+    margin-top: 1.5rem;
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: not-allowed;
+    transition: background-color 0.2s ease;
     }
-  </style>
+
+    .save-btn.enabled {
+    background-color: #a97ff2;
+    cursor: pointer;
+    }
+</style>
+
 </head>
 <body>
 
@@ -118,34 +126,40 @@
       </div>
 
       <!-- Settings Form -->
-      <form>
+        <form method="POST" action="/settings">
         <div class="mb-3">
-          <label for="firstName"> Username </label>
-          <input type="text" class="form-control" id="firstName" value="Velda">
+            <label for="username"> Username </label>
+            <input type="text" class="form-control" name="username" id="username" value="{{userData.username}}">
         </div>
         <div class="mb-3">
-          <label for="firstName">First Name</label>
-          <input type="text" class="form-control" id="firstName" value="Velda">
+            <label for="firstName">First Name</label>
+            <input type="text" class="form-control" name="firstname" id="firstName" value="{{userData.firstname}}">
         </div>
         <div class="mb-3">
-          <label for="lastName">Last Name</label>
-          <input type="text" class="form-control" id="lastName" value="Kiara">
+            <label for="lastName">Last Name</label>
+            <input type="text" class="form-control" name="lastname" id="lastName" value="{{userData.lastname}}">
         </div>
         <div class="mb-3">
-          <label for="email">Email</label>
-          <input type="email" class="form-control" id="email" value="velda@gmail.com">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" name="email" id="email" value="{{userData.email}}">
         </div>
         <div class="mb-3 form-group">
-          <label for="newPassword">New Password</label>
-          <input type="password" class="form-control" id="newPassword">
-        </div>
-        <div class="mb-3 form-group">
-          <label for="confirmPassword">Confirm Password</label>
-          <input type="password" class="form-control" id="confirmPassword">
+        <label for="currentPassword">Current Password</label>
+        <input type="password" class="form-control" id="currentPassword" name="currentPassword">
         </div>
 
-        <button type="submit" class="save-btn" disabled>Save</button>
-      </form>
+        <div class="mb-3 form-group">
+        <label for="newPassword">New Password</label>
+        <input type="password" class="form-control" id="newPassword" name="newPassword">
+        </div>
+
+        <div class="mb-3 form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+        </div>
+        <button type="submit" class="save-btn">Save</button>
+        </form>
+
     </div>
   </div>
 
@@ -163,10 +177,49 @@
         };
         reader.readAsDataURL(avatarInput.files[0]);
 
-
+        // Optional small delay for preview effect
+          avatarForm.submit();
       }
     });
   </script>
+
+    <script>
+    const form = document.querySelector('form[action="/settings"]');
+    const inputs = form.querySelectorAll('input');
+    const saveBtn = form.querySelector('.save-btn');
+
+    // Store original values
+    const originalValues = {};
+    inputs.forEach(input => {
+        originalValues[input.name] = input.value;
+    });
+
+    function checkForChanges() {
+        let changed = false;
+        inputs.forEach(input => {
+        if (input.value !== originalValues[input.name]) {
+            changed = true;
+        }
+        });
+
+        if (changed) {
+        saveBtn.classList.add('enabled');
+        saveBtn.disabled = false;
+        } else {
+        saveBtn.classList.remove('enabled');
+        saveBtn.disabled = true;
+        }
+    }
+
+    inputs.forEach(input => {
+        input.addEventListener('input', checkForChanges);
+    });
+
+    // Disable button on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        saveBtn.disabled = true;
+    });
+    </script>
 
 </body>
 </html>
