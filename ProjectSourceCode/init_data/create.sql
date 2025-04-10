@@ -24,15 +24,12 @@ CREATE TABLE trails
     trail_id SERIAL PRIMARY KEY
 );
 
-
--- Create tables (order matters for foreign keys)
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(30) NOT NULL,
     password VARCHAR(100) NOT NULL,
-    firstname VARCHAR(50),
-    lastname VARCHAR (50),
-    email VARCHAR (50),
+    total_distance SERIAL NOT NULL,
+    about VARCHAR(200) NOT NULL,
     avatar BYTEA
 );
 
@@ -66,18 +63,6 @@ CREATE TABLE IF NOT EXISTS images
   image_caption VARCHAR(200)
 );
 
-DROP TABLE IF EXISTS users CASCADE;
-CREATE TABLE users
-(
-    user_id SERIAL PRIMARY KEY NOT NULL,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(60) NOT NULL,
-    total_distance SERIAL NOT NULL,
-    about VARCHAR(200) NOT NULL,
-    avatar BYTEA
-);
-
-DROP TABLE IF EXISTS achievements;
 CREATE TABLE achievements
 (
     achievements_id SERIAL NOT NULL,
@@ -85,7 +70,6 @@ CREATE TABLE achievements
     achievements_caption VARCHAR(200)
 );
 
-DROP TABLE IF EXISTS history CASCADE;
 CREATE TABLE history
 (
     history_id SERIAL NOT NULL,
@@ -95,7 +79,6 @@ CREATE TABLE history
     date DATE
 );
 
-DROP TABLE IF EXISTS trails_to_reviews CASCADE;
 CREATE TABLE trails_to_reviews 
 (
   trail_id INT NOT NULL,
@@ -128,6 +111,7 @@ CREATE TABLE user_to_friend (
     PRIMARY KEY (username, friend_id)
 );
 
+-- Struggling to work
 CREATE TABLE user_to_achievements (
     username INT NOT NULL,
     achievements_id INT NOT NULL,
