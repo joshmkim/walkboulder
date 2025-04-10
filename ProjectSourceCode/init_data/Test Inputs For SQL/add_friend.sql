@@ -11,7 +11,6 @@ INSERT INTO user_to_friend (username, friend_id)
     (1, 2),
     (3, 1);
 
-
 /* TESTING FOR A SPECIFIC USER */
 SELECT 
     users.username AS friend_name

@@ -57,3 +57,28 @@ AFTER INSERT ON user_to_friend
 FOR EACH ROW
 EXECUTE FUNCTION make_friendship_mutual();"
     - What ways are there to make adding friends a two-ways relationship?
+
+"SELECT COUNT(DISTINCT h.buddy) AS unique_buddies
+FROM user_to_history uh
+JOIN history h ON uh.history_id = h.history_id
+WHERE uh.username = $1
+  AND h.buddy IS NOT NULL
+  AND h.buddy != '';
+
+SELECT 1
+FROM user_to_achievements
+WHERE username = $1 AND achievements_id = $2;
+
+INSERT INTO user_to_achievements (username, achievements_id)
+VALUES ($1, $2);"
+    - How could I test to see if the criteria to earn the achievement is met?
+
+"SELECT COUNT(DISTINCT h.buddy) AS unique_buddies
+FROM user_to_history uh
+JOIN history h ON uh.history_id = h.history_id
+WHERE uh.username = $1
+  AND h.buddy IS NOT NULL
+  AND h.buddy != 'No Buddy';
+
+AND LOWER(h.buddy) != 'no buddy'" -- for case-sensitive cases
+    - With the example achievement - what if the user's buddy was call "No Buddy", where, as the name implies, there was no one else walking besides the user?
