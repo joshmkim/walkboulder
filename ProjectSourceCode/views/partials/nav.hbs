@@ -1,37 +1,35 @@
-<header>
-  <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom shadow-sm">
-    <div class="container">
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar navbar-expand-sm navbar-light">
+      <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+          <img src="https://cdn-icons-png.flaticon.com/128/5604/5604658.png" style="height: 40px;" />
+          WalkBoulder
+        </a>
 
-      <!-- Sitename -->
-      <a class="navbar-brand fw-bold">WalkBoulder</a>
+        <!-- Navbar Toggler -->
+        <button 
+          class="navbar-toggler" 
+          type="button" 
+          data-bs-toggle="collapse" 
+          data-bs-target="#navbar-collapse" 
+          aria-controls="navbar-collapse" 
+          aria-expanded="false" 
+          aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-      <!-- Navbar Toggler -->
-      <button 
-        class="navbar-toggler" 
-        type="button" 
-        data-bs-toggle="collapse" 
-        data-bs-target="#navbar-collapse" 
-        aria-controls="navbar-collapse" 
-        aria-expanded="false" 
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- Home Link -->
-      <div class="collapse navbar-collapse" id="navbar-collapse">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/">Home</a>
-          </li>
-        </ul>
-
-        <!-- Right side Links -->
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/maps">Maps</a>
-          </li>
-          {{#if user}}
-            <!-- Show these when logged in -->
+        <!-- Navbar Links -->
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/">Home</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/maps">Maps</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link fw-medium" href="/profile">Profile</a>
             </li>
@@ -41,15 +39,11 @@
             <li class="nav-item">
               <a class="nav-link fw-medium" href="/logout">Logout</a>
             </li>
-          {{else}}
-            <!-- Show these when logged out -->
             <li class="nav-item">
-              <a class="nav-link fw-medium" href="/login">Login</a>
+              <a class="nav-link login-button" href="/login">Login</a>
             </li>
-          {{/if}}
-        </ul>
+          </ul>
+        </div>
       </div>
-
-    </div>
-  </nav>
-</header>
+    </nav>
+  </header>

@@ -59,6 +59,8 @@ app.use(
   })
 );
 
+app.use(express.static(path.join(__dirname, 'resources')));
+
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
@@ -198,6 +200,14 @@ app.get('/logout', (req, res) => {
 
 // Authentication Required
 app.use(auth); // I would advise putting routes like reviews and group walks AFTER this auth as I think users should have to login before they are allowed to post reviews or go on group walks
+
+
+//------------------------HOMEPAGE----------------------------
+
+
+
+
+
 
 // ----------------------- starting the server -----------------------
 
