@@ -702,19 +702,7 @@
 
 
             <div class="error-message" role="alert"></div>
-            <div class="travel-modes">
-              <input type="radio" name="travel-mode" id="driving-mode" value="DRIVING" aria-label="Driving travel mode">
-              <label for="driving-mode" class="left-label" title="Driving travel mode">
-                <svg aria-label="Driving icon" mlns="http://www.w3.org/2000/svg">
-                  <use href="#commutes-driving-icon"/>
-                </svg>
-              </label>
-              <input type="radio" name="travel-mode" id="transit-mode" value="TRANSIT" aria-label="Public transit travel mode">
-              <label for="transit-mode" title="Public transit travel mode">
-                <svg aria-label="Public transit icon" xmlns="http://www.w3.org/2000/svg">
-                  <use href="#commutes-transit-icon"/>
-                </svg>
-              </label>
+            <div class="travel-modes">              
               <input type="radio" name="travel-mode" id="bicycling-mode" value="BICYCLING" aria-label="Bicycling travel mode">
               <label for="bicycling-mode" title="Bicycling travel mode">
                 <svg aria-label="Bicycling icon" xmlns="http://www.w3.org/2000/svg">
@@ -777,6 +765,7 @@
     const destinationModalEl = {
       title: commutesEl.modal.querySelector('h2'),
       form: commutesEl.modal.querySelector('form'),
+startInput: commutesEl.modal.querySelector('input[name="start-address"]'),
       destinationInput: commutesEl.modal.querySelector('input[name="destination-address"]'),
       errorMessage: commutesEl.modal.querySelector('.error-message'),
       addButton: commutesEl.modal.querySelector('.add-destination-button'),
@@ -1004,6 +993,7 @@
         };
 
         const destinationFormReset = function() {
+          destinationModalEl.startInput.classList.remove('error');
           destinationModalEl.destinationInput.classList.remove('error');
           destinationModalEl.errorMessage.innerHTML = '';
           destinationModalEl.form.reset();
@@ -1016,6 +1006,21 @@
         };
         const autocomplete = new google.maps.places.Autocomplete(
             destinationModalEl.destinationInput, autocompleteOptions);
+
+const startAutocomplete = new google.maps.places.Autocomplete(
+            destinationModalEl.startInput, autocompleteOptions);
+let startToAdd;
+startAutocomplete.addListener('place_changed', () => {
+  const place = startAutocomplete.getPlace();
+  if (!place.geometry || !place.geometry.location) {
+    return;
+  }
+  startToAdd = place;
+  destinationModalEl.destinationInput.focus();
+  destinationModalEl.startInput.classList.remove('error');
+  destinationModalEl.errorMessage.innerHTML = '';
+});
+
         let destinationToAdd;
         autocomplete.addListener('place_changed', () => {
           const place = autocomplete.getPlace();
@@ -1349,9 +1354,12 @@
         const startInput = document.getElementById('start-address-input');
         const startPlace = startInput.value.trim();
         
+        const destinationText = document.getElementById('destination-address-input').value.trim();
+        
         origin = startPlace ? startPlace : origin;
 
         console.log(origin);
+        console.log(destinationText);
         console.log(destination);
 
         const request = {
