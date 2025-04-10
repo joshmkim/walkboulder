@@ -199,23 +199,14 @@ app.get('/logout', (req, res) => {
 // Authentication Required
 app.use(auth); // I would advise putting routes like reviews and group walks AFTER this auth as I think users should have to login before they are allowed to post reviews or go on group walks
 
-// app.get('/reviews', (req, res) =>
-//   {
-//     res.render('pages/reviews')
-//     console.log("hello");
-//   })
+
 
   app.get('/reviews', async (req, res) => {
     const { trail_name, rating, written_review } = req.body;
     const userId = req.session.user.user_id;
     try {
         // Fetch all reviews from the database
-        const result = await db.any(`
-          SELECT reviews.review_id, reviews.trail_name, reviews.rating, reviews.written_review, users.username
-          FROM reviews
-          JOIN users_to_reviews ON reviews.review_id = users_to_reviews.review_id
-          JOIN users ON users_to_reviews.user_id = users.user_id;
-        `);
+        const result = await db.any(`SELECT * FROM reviews`);
         // If no reviews exist, result.rows will be an empty array
         // const reviews = result.rows;
         console.log('results:', result);
@@ -233,8 +224,8 @@ app.post('/submit-review', async (req, res) => {
 
 
   try {
-      await db.query('INSERT INTO reviews (trail_name, rating, written_review, userId) VALUES ($1, $2, $3,$4)',
-          [trail_name, rating, written_review,userId]);
+      await db.query('INSERT INTO reviews (trail_name, rating, written_review) VALUES ($1, $2, $3)',
+          [trail_name, rating, written_review]);
           console.log('Review Data:', { trail_name, rating, written_review });  // Log review data
 
           res.redirect('/reviews');

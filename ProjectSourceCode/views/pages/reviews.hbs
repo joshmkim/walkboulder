@@ -55,14 +55,14 @@
           <h5 class="card-title">{{trail_name}}</h5>
           <p class="card-text">Rating: {{rating}}/5</p>
           <p class="card-text">{{written_review}}</p>
-          <p class="card-text"><strong>Posted by:</strong> {{username}}</p> <!-- Show the username -->
+          {{!-- <p class="card-text"><strong>Posted by:</strong> {{username}}</p> <!-- Show the username --> --}}
 
         </div>
       </div>
     {{/each}}
   </div>
 {{else}}
-  <p>No reviews yet for this trail. Be the first to leave one!</p>
+  <p>No reviews yet. Be the first to leave one!</p>
 {{/if}}
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
