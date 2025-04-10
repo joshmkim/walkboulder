@@ -29,7 +29,7 @@ FROM
     JOIN history 
         ON user_to_history.history_id = history.history_id
 WHERE 
-    user_to_history.username = 1
+    user_to_history.username = 1 -- hard coding for testing purpose
     AND history.buddy IS NOT NULL
     AND history.buddy != 'No Buddy'
     AND LOWER(history.buddy) != 'no buddy'; -- accounting for case sensitive no buddy

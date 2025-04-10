@@ -9,4 +9,5 @@ INSERT INTO achievements (achievements_id, achievements_url, achievements_captio
     (7, '', 'First walk with a buddy'),
     (8, '', 'Use WalkBoulder for 1 month'),
     (9, '', 'Walk on a pre-set trail'),
-    (10, '', 'Create your own route');
+    (10, '', 'Create your own route')
+    (11, '', 'Walk with three distict buddies')
