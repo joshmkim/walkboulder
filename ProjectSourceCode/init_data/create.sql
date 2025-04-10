@@ -114,6 +114,8 @@ DROP TABLE IF EXISTS history CASCADE;
 DROP TABLE IF EXISTS achievements CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS trails CASCADE;
+DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS images CASCADE;
 
 -- Create tables (order matters for foreign keys)
 CREATE TABLE trails 
@@ -145,6 +147,21 @@ CREATE TABLE history (
     end_location VARCHAR(100) NOT NULL,
     buddy VARCHAR(100) NOT NULL,
     date DATE NOT NULL  -- Changed to DATE type
+);
+
+CREATE TABLE IF NOT EXISTS reviews 
+(
+  review_id SERIAL PRIMARY KEY NOT NULL,
+  username VARCHAR(100),
+  review VARCHAR(200),
+  rating DECIMAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS images 
+(
+  image_id SERIAL PRIMARY KEY NOT NULL,
+  image_url VARCHAR(300) NOT NULL,
+  image_caption VARCHAR(200)
 );
 
 -- Assuming these tables exist (add their CREATE statements if not)
