@@ -14,6 +14,9 @@ CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(30) NOT NULL,
     password VARCHAR(100) NOT NULL,
+    firstname VARCHAR(50),
+    lastname VARCHAR (50),
+    email VARCHAR (50),
     avatar BYTEA
 );
 

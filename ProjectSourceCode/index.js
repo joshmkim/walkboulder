@@ -249,7 +249,7 @@ app.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
     );
     req.session.user = updatedUser;
 
-    res.redirect('/profile');
+    res.redirect('/settings');
   } catch (err) {
     res.status(500).send('Server error while uploading avatar.');
   }
@@ -274,6 +274,30 @@ app.get('/avatar/:userId', async (req, res) => {
   } catch (err) {
     res.status(500).send('Server error.');
   }
+});
+
+// --------------------------------------- SETTINGS ENDPOINTS ------------------------------------------------------------------
+
+app.get('/settings', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
+  const user = req.session.user;
+  const userData = {
+    username: user.username,
+    avatar: `/avatar/${user.user_id}`,
+    bio: user.bio || "This user hasn’t written a bio yet.",
+    password: user.password,
+    email: user.email || "No email on record",
+    firstname: user.firstname || "No first name on record.",
+    lastname: user.lastname || "No last name on record."
+
+
+
+  };
+
+  res.render('pages/settings', {userData});
 });
 
 
