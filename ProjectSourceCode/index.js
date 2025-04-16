@@ -214,14 +214,23 @@ app.get('/profile', async (req, res) => {
     return res.redirect('/login');
   }
   try {
+    // achievements
     const achievementQuery = `SELECT username FROM users`; // `SELECT achievement_url, achievement_url FROM achievements`
     const achievements = await db.any(achievementQuery);
+    
+    // friends
+    const friendQuery = `SELECT users.username FROM users WHERE users.user_id = ALL (SELECT friend_id FROM user_to_friend WHERE user_id = user_to_friend.username)`;
+    const friends = await db.any(friendQuery);
+    
+    // for debugging
     console.log(achievements);
-  const user = req.session.user;
-  const userData = {
+    
+    const user = req.session.user;
+    const userData = {
     name: user.username,
     avatar: `/avatar/${user.user_id}`,
     bio: user.bio || "This user hasn’t written a bio yet.",
+    friends: friends,
     achievements: achievements
   };
   res.render('pages/profile', { userData });

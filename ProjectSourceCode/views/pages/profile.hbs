@@ -45,6 +45,20 @@
     padding: 1rem;
   }
 
+  .friends-box {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  padding: 1rem;
+}
+
+{{!-- .friend-avatar {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
+} --}}
+
   .custom-btn {
     display: inline-block;
     padding: 0.4rem 1rem;
@@ -89,7 +103,38 @@
       {{else}}
         <p class="bio-text text-muted">This user hasn’t written a bio yet.</p>
       {{/if}}
-      
+
+      {{!-- <!-- Friends -->
+      <div class="Friend-box mt-4 text-start">
+        <h5 class="mb-3">Friends</h5>
+        {{#if userData.friends.length}}
+          <ul class="list-unstyled">
+            {{#each userData.friends}}
+              <li class="mb-2">🏆 {{this.username}}</li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p class="text-muted">No friends yet.</p>
+        {{/if}}
+      </div> --}}
+      <!-- Friends Section -->
+      <div class="friends-box mt-4 text-start">
+        <h5 class="mb-3">Friends</h5>
+        {{#if userData.friends.length}}
+          <ul class="list-unstyled">
+            {{#each userData.friends}}
+              <li class="d-flex align-items-center mb-2">
+                {{!-- <img src="{{this.avatar}}" alt="{{this.username}} avatar" class="friend-avatar me-2"> --}}
+                <span>{{this.username}}</span>
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p class="text-muted">You don't have any friends added yet.</p>
+        {{/if}}
+      </div>
+
+
       {{!-- <!--Achievements-->
       <div class="container">
       {{#each userData.achievements}}
