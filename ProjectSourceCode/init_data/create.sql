@@ -28,8 +28,8 @@ CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(30) NOT NULL,
     password VARCHAR(100) NOT NULL,
-    total_distance SERIAL NOT NULL,
-    about VARCHAR(200) NOT NULL,
+    total_distance INT, -- or DECIMAL
+    about VARCHAR(200),
     avatar BYTEA
 );
 
@@ -61,22 +61,6 @@ CREATE TABLE IF NOT EXISTS images
   image_id SERIAL PRIMARY KEY NOT NULL,
   image_url VARCHAR(300) NOT NULL,
   image_caption VARCHAR(200)
-);
-
-CREATE TABLE achievements
-(
-    achievements_id SERIAL NOT NULL,
-    achievements_url VARCHAR(300) NOT NULL,
-    achievements_caption VARCHAR(200)
-);
-
-CREATE TABLE history
-(
-    history_id SERIAL NOT NULL,
-    start_location VARCHAR(100) NOT NULL,
-    end_location VARCHAR(100) NOT NULL,
-    buddy VARCHAR(100) NOT NULL,
-    date DATE
 );
 
 CREATE TABLE trails_to_reviews 

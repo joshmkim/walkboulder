@@ -209,19 +209,26 @@ app.use(auth); // I would advise putting routes like reviews and group walks AFT
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.get('/profile', (req, res) => {
+app.get('/profile', async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
-
+  try {
+    const achievementQuery = `SELECT username FROM users`; // `SELECT achievement_url, achievement_url FROM achievements`
+    const achievements = await db.any(achievementQuery);
+    console.log(achievements);
   const user = req.session.user;
   const userData = {
     name: user.username,
     avatar: `/avatar/${user.user_id}`,
-    bio: user.bio || "This user hasn’t written a bio yet."
+    bio: user.bio || "This user hasn’t written a bio yet.",
+    achievements: achievements
   };
-
   res.render('pages/profile', { userData });
+}
+catch (err) {
+  res.status(500).send('Profile error');
+}
 });
 
 // Uploading avatars

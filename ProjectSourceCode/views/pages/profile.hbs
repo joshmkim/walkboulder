@@ -38,18 +38,25 @@
     color: #555;
   }
 
-    .custom-btn {
-      display: inline-block;
-      padding: 0.4rem 1rem;
-      font-size: 0.95rem;
-      background-color: #000;
-      color: white;
-      border: 1px solid #000;
-      border-radius: 5px;
-      text-decoration: none;
-      margin-top: 0.3rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
+  .achievements-box {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f1f1f1;
+    padding: 1rem;
+  }
+
+  .custom-btn {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+    background-color: #000;
+    color: white;
+    border: 1px solid #000;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-top: 0.3rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
     }
 
   .custom-btn:hover {
@@ -82,6 +89,26 @@
       {{else}}
         <p class="bio-text text-muted">This user hasn’t written a bio yet.</p>
       {{/if}}
+      
+      {{!-- <!--Achievements-->
+      <div class="container">
+      {{#each userData.achievements}}
+        <p>{{this.username}}</p>
+      {{/each}}
+      </div> --}}
+      <!-- Achievements -->
+      <div class="achievements-box mt-4 text-start">
+        <h5 class="mb-3">Achievements</h5>
+        {{#if userData.achievements.length}}
+          <ul class="list-unstyled">
+            {{#each userData.achievements}}
+              <li class="mb-2">🏆 {{this.username}}</li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p class="text-muted">No achievements yet.</p>
+        {{/if}}
+      </div>
 
       <!-- Action Buttons -->
       <div class="mt-4">
