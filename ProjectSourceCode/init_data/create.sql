@@ -12,6 +12,10 @@ DROP TABLE IF EXISTS trails CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS images CASCADE;
 
+
+
+
+
 -- Create tables (order matters for foreign keys)
 CREATE TABLE trails 
 (
@@ -21,7 +25,9 @@ CREATE TABLE trails
     distance DECIMAL,
     location VARCHAR(100) NOT NULL,
     name VARCHAR(100) NOT NULL,
-    trail_id SERIAL PRIMARY KEY
+    trail_id SERIAL PRIMARY KEY,
+    image_url VARCHAR(300),  -- Added for trail images
+    elevation_gain DECIMAL  -- Added for more trail details
 );
 
 CREATE TABLE users (
@@ -148,3 +154,12 @@ CREATE TRIGGER mutual_friendship
 AFTER INSERT ON user_to_friend
 FOR EACH ROW
 EXECUTE FUNCTION make_friendship_mutual();
+
+
+-- Sample trail data
+INSERT INTO trails (name, description, distance, difficulty, location, average_rating, image_url, elevation_gain)
+VALUES 
+('Boulder Creek Path', 'Scenic path along Boulder Creek', 5.7, 'easy', 'Boulder, CO', 4.5, 'https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?auto=format&fit=crop&w=800', 200),
+('Chautauqua Trail', 'Iconic trail with flatirons views', 2.8, 'moderate', 'Boulder, CO', 4.8, 'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?auto=format&fit=crop&w=800', 700),
+('Flagstaff Trail', 'Steep trail with panoramic views', 4.1, 'difficult', 'Boulder, CO', 4.3, 'https://images.unsplash.com/photo-1727543328422-6ceba651193e?auto=format&fit=crop&w=800', 1200),
+('Royal Arch Trail', 'Challenging hike to natural arch', 3.5, 'very_difficult', 'Boulder, CO', 4.7, 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800', 1400);

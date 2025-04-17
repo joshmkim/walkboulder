@@ -64,12 +64,28 @@
         body {
             padding-top: 56px;
         }
+        
+        /* Always solid on specific pages */
+        .navbar-always-solid {
+            background-color: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-always-solid .nav-link {
+            color: #333 !important;
+        }
+        .navbar-always-solid .navbar-brand {
+            color: #333 !important;
+        }
+        .navbar-always-solid .login-button {
+            background-color: #4a90e2;
+            color: white !important;
+        }
     </style>
 </head>
 <body>
     <!-- Your Navbar -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light navbar-transparent">
+        <nav class="navbar navbar-expand-sm navbar-light">
             <div class="container">
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
                     <img src="https://icon-library.com/images/walk-icon-png/walk-icon-png-14.jpg" style="height: 40px;" />
@@ -86,6 +102,8 @@
                             <a class="nav-link fw-medium" href="/">Home</a>
                         </li>
                     </ul>
+
+
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <a class="nav-link fw-medium" href="/maps">Maps</a>
@@ -103,6 +121,8 @@
                             <a class="nav-link login-button" href="/login">Login</a>
                         </li>
                     </ul>
+
+                    
                 </div>
             </div>
         </nav>
@@ -117,18 +137,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const navbar = document.querySelector('.navbar');
+            const currentPath = window.location.pathname;
+            const solidPages = ['/maps', '/login', '/register'];
             
-            // Set initial state
-            if (window.scrollY === 0) {
-                navbar.classList.add('navbar-transparent');
-                navbar.classList.remove('navbar-solid');
+            // Check if current page should have always-solid navbar
+            const shouldBeAlwaysSolid = solidPages.some(page => currentPath.includes(page));
+            
+            if (shouldBeAlwaysSolid) {
+                // Always solid on specific pages
+                navbar.classList.add('navbar-always-solid');
             } else {
-                navbar.classList.add('navbar-solid');
-                navbar.classList.remove('navbar-transparent');
-            }
-            
-            // Change state on scroll
-            window.addEventListener('scroll', function() {
+                // Regular behavior for other pages
+                // Set initial state
                 if (window.scrollY === 0) {
                     navbar.classList.add('navbar-transparent');
                     navbar.classList.remove('navbar-solid');
@@ -136,7 +156,18 @@
                     navbar.classList.add('navbar-solid');
                     navbar.classList.remove('navbar-transparent');
                 }
-            });
+                
+                // Change state on scroll
+                window.addEventListener('scroll', function() {
+                    if (window.scrollY === 0) {
+                        navbar.classList.add('navbar-transparent');
+                        navbar.classList.remove('navbar-solid');
+                    } else {
+                        navbar.classList.add('navbar-solid');
+                        navbar.classList.remove('navbar-transparent');
+                    }
+                });
+            }
         });
     </script>
 </body>

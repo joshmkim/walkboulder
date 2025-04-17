@@ -61,8 +61,10 @@ app.use(express.static(path.join(__dirname, 'resources')));
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
+  res.locals.isAuthenticated = !!req.session.user;
   next();
 });
+
 
 app.use(
   bodyParser.urlencoded({
@@ -71,6 +73,31 @@ app.use(
 );
 
 // --------------------- Routes --------------------------------------
+
+router.get('/', async (req, res) => {
+  try {
+      // Query trails from database
+      const trails = await pool.query(`
+          SELECT t.*, COUNT(r.review_id) as review_count
+          FROM trails t
+          LEFT JOIN trails_to_reviews tr ON t.trail_id = tr.trail_id
+          LEFT JOIN reviews r ON tr.review_id = r.review_id
+          GROUP BY t.trail_id
+          ORDER BY t.average_rating DESC
+          LIMIT 4
+      `);
+      
+      // Render the template with trail data
+      res.render('index', { 
+          title: 'Walk Boulder',
+          trails: trails.rows,
+          isAuthenticated: req.isAuthenticated()
+      });
+  } catch (err) {
+      console.error(err);
+      res.status(500).send("Server Error");
+  }
+});
 
 app.get('/welcome', (req, res) => {
   res.json({ status: 'success', message: 'Welcome!' });
@@ -85,6 +112,7 @@ app.get('/maps', (req, res) => {
 });
 
 // ---------- LOGIN/LOGOUT/REGISTER ----------------------------------------
+
 
 app.get('/register', (req, res) => {
   res.render('pages/register');
