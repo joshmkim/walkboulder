@@ -1,70 +1,362 @@
+{{!-- 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reviews</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body>
-    <div class="container mt-5">
-  <h1 class="text-center mb-4">Reviews</h1>
-  <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#review_modal">
-    Write Review
-  </button> 
+  {{!-- <div class="container mt-5">
+    <h1 class="text-center mb-4">Trail Reviews</h1>
+    
+    <!-- Add Review Button -->
+    <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#review_modal">
+      Write Review
+    </button>
 
-  <div class="modal" id="review_modal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Write a Review</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Reviews Grouped by Trail -->
+    {{#each groupedReviews}}
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h3>{{@key}}</h3> <!-- Trail name -->
         </div>
+        <div class="card-body">
+          {{#each this}}
+            <div class="mb-3 p-3 border-bottom">
+              <div class="d-flex justify-content-between">
+                <h5>{{username}}</h5>
+                <div class="text-warning">
+                  {{#times rating}}★{{/times}}
+                </div>
+              </div>
+              <p>{{written_review}}</p>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{else}}
+      <div class="alert alert-info">No reviews yet!</div>
+    {{/each}} --}}
+{{!-- <div class="container mt-5">
+  <h1 class="text-center mb-4">Trail Reviews</h1>
+  
+  <!-- Sort Controls -->
+  <div class="d-flex justify-content-end mb-3">
+    <div class="btn-group">
+      <button class="btn btn-outline-secondary sort-btn active" data-sort="popular">
+        Most Reviews
+      </button>
+      <button class="btn btn-outline-secondary sort-btn" data-sort="rating">
+        Highest Rated
+      </button>
+    </div>
+  </div>
+
+  <!-- Trails List -->
+  <div class="list-group" id="trails-list">
+    {{#each trails}}
+      <div class="list-group-item trail-item" data-trail-id="{{trail_id}}">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-1">{{trail_name}}</h5>
+          <div>
+            <span class="badge bg-primary rounded-pill">{{review_count}} reviews</span>
+            <span class="badge bg-warning text-dark ms-2">
+              Avg: {{avg_rating}} ★
+            </span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-link toggle-reviews" data-bs-toggle="collapse" 
+                data-bs-target="#reviews-{{trail_id}}">
+          Show Reviews
+        </button>
+        
+        <!-- Collapsible Reviews Section -->
+        <div class="collapse mt-3" id="reviews-{{trail_id}}">
+          {{#if reviews.length}}
+            {{#each reviews}}
+              <div class="card mb-2">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <h6 class="card-title">{{username}}</h6>
+                    <div class="text-warning">{{rating}} ★</div>
+                  </div>
+                  <p class="card-text">{{written_review}}</p>
+                </div>
+              </div>
+            {{/each}}
+          {{else}}
+            <div class="alert alert-info">No reviews yet!</div>
+          {{/if}}
+        </div>
+      </div>
+    {{else}}
+      <div class="alert alert-warning">No trails found!</div>
+    {{/each}}
+  </div>
+</div>
+
+<script>
+// Sort trails
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    
+    const sortBy = this.dataset.sort;
+    const trailsList = document.getElementById('trails-list');
+    const items = Array.from(document.querySelectorAll('.trail-item'));
+    
+    items.sort((a, b) => {
+      if (sortBy === 'popular') {
+        return parseInt(b.querySelector('.bg-primary').textContent) - 
+               parseInt(a.querySelector('.bg-primary').textContent);
+      } else {
+        return parseFloat(b.querySelector('.bg-warning').textContent.split(' ')[1]) - 
+               parseFloat(a.querySelector('.bg-warning').textContent.split(' ')[1]);
+      }
+    });
+    
+    items.forEach(item => trailsList.appendChild(item));
+  });
+});
+</script>
+    <!-- Review Modal -->
+    <!-- Review Modal -->
+<div class="modal fade" id="review_modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Write a Review</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/submit-review" method="POST">
         <div class="modal-body">
-          <!-- Here is the form that will POST to your server -->
-          <form action="/submit-review" method="POST" id="review_form">
-            <div class="mb-3">
-              <label for="trail_name" class="form-label">Trail Name</label>
-              <input type="text" class="form-control" id="trail_name" name="trail_name" required>
-            </div>
-            <div class="mb-3">
-              <label for="rating" class="form-label">Rating</label>
-              <input type="number" class="form-control" id="rating" name="rating" min="1" max="5" required>
-            </div>
-            <div class="mb-3">
-              <label for="written_review" class="form-label">Your Review</label>
-              <input type="text" class="form-control" id="written_review" name="written_review" placeholder="Share your thoughts on this trail" required>
+          <div class="mb-3">
+            <label for="trail_id" class="form-label">Trail</label>
+            <select class="form-select" name="trail_id" id="trail_id" required>
+              {{#each allTrails}}
+                <option value="{{trail_id}}">{{trail_name}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <!-- Rest of your modal form -->
+        </div>
+      </form>
+    </div>
+  </div>
+</div> --}}
+    {{!-- <div class="modal fade" id="review_modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Write a Review</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="/submit-review" method="POST">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="trail_id" class="form-label">Trail</label>
+                <select class="form-select" name="trail_id" id="trail_id" required>
+                  {{#each trails}}
+                    <option value="{{trail_id}}">{{trail_name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="rating" class="form-label">Rating</label>
+                <input type="number" class="form-control" name="rating" min="1" max="5" required>
+              </div>
+              <div class="mb-3">
+                <label for="written_review" class="form-label">Review</label>
+                <textarea class="form-control" name="written_review" rows="3" required></textarea>
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Post</button>
+              <button type="submit" class="btn btn-primary">Submit</button>
             </div>
           </form>
         </div>
       </div>
     </div>
-  </div>
-</div>
+  </div> --}}
 
-
-{{#if result.length}}
-  <div class="reviews-list">
-    {{#each result}}
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title">{{trail_name}}</h5>
-          <p class="card-text">Rating: {{rating}}/5</p>
-          <p class="card-text">{{written_review}}</p>
-          {{!-- <p class="card-text"><strong>Posted by:</strong> {{username}}</p> <!-- Show the username --> --}}
-
-        </div>
-      </div>
-    {{/each}}
-  </div>
-{{else}}
-  <p>No reviews yet. Be the first to leave one!</p>
-{{/if}}
+  {{!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Register a Handlebars helper for star ratings -->
+  <script>
+    Handlebars.registerHelper('times', function(n, block) {
+      let accum = '';
+      for(let i = 0; i < n; ++i) accum += block.fn(i);
+      return accum;
+    });
+  </script>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="index.js"></script>
+</html> --}} 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviews</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Trail Reviews</h1>
+    
+    <!-- Add Review Button -->
+    <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#reviewModal">
+      Write Review
+    </button>
+
+    <!-- Sort Controls -->
+    <div class="d-flex justify-content-end mb-3">
+      <div class="btn-group">
+        <button class="btn btn-outline-secondary sort-btn active" data-sort="popular">
+          Most Reviews
+        </button>
+        <button class="btn btn-outline-secondary sort-btn" data-sort="rating">
+          Highest Rated
+        </button>
+      </div>
+    </div>
+
+    <!-- Trails List -->
+    <div class="list-group" id="trails-list">
+      {{#each trails}}
+        <div class="list-group-item trail-item" data-trail-id="{{trail_id}}">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-1">{{trail_name}}</h5>
+            <div>
+              <span class="badge bg-primary rounded-pill">{{review_count}} reviews</span>
+              <span class="badge bg-warning text-dark ms-2">
+                Avg: {{avg_rating}} ★
+              </span>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-link toggle-reviews" data-bs-toggle="collapse" 
+                  data-bs-target="#reviews-{{trail_id}}">
+            Show Reviews
+          </button>
+          
+          <!-- Collapsible Reviews Section -->
+          <div class="collapse mt-3" id="reviews-{{trail_id}}">
+            {{#if reviews.length}}
+              {{#each reviews}}
+                <div class="card mb-2">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                      <h6 class="card-title">{{username}}</h6>
+                      <div class="text-warning">{{rating}} ★</div>
+                    </div>
+                    <p class="card-text">{{written_review}}</p>
+                  </div>
+                </div>
+              {{/each}}
+            {{else}}
+              <div class="alert alert-info">No reviews yet!</div>
+            {{/if}}
+          </div>
+        </div>
+      {{else}}
+        <div class="alert alert-warning">No trails found!</div>
+      {{/each}}
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="reviewModalLabel">Write a Review</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="/submit-review" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="trailSelect" class="form-label">Select Trail</label>
+              <select class="form-select" id="trailSelect" name="trail_id" required>
+                <option value="" selected disabled>Choose a trail...</option>
+                {{#each allTrails}}
+                  <option value="{{trail_id}}">{{trail_name}}</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="ratingInput" class="form-label">Rating</label>
+              <select class="form-select" id="ratingInput" name="rating" required>
+                <option value="" selected disabled>Select rating...</option>
+                <option value="1">1 ★</option>
+                <option value="2">2 ★</option>
+                <option value="3">3 ★</option>
+                <option value="4">4 ★</option>
+                <option value="5">5 ★</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="reviewText" class="form-label">Your Review</label>
+              <textarea class="form-control" id="reviewText" name="written_review" rows="3" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const trailsList = document.getElementById('trails-list');
+    const sortButtons = document.querySelectorAll('.sort-btn');
+    
+    // Store original order for reset if needed
+    const originalOrder = Array.from(document.querySelectorAll('.trail-item'));
+    
+    sortButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update active button
+        sortButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Get all trail items
+        const items = Array.from(document.querySelectorAll('.trail-item'));
+        
+        // Sort based on selected criteria
+        items.sort((a, b) => {
+          // Get review count (from the primary badge)
+          const aReviews = parseInt(a.querySelector('.bg-primary').textContent);
+          const bReviews = parseInt(b.querySelector('.bg-primary').textContent);
+          
+          // Get average rating (from the warning badge)
+          const aRating = parseFloat(a.querySelector('.bg-warning').textContent.match(/\d+\.?\d*/)[0]);
+          const bRating = parseFloat(b.querySelector('.bg-warning').textContent.match(/\d+\.?\d*/)[0]);
+          
+          if (this.dataset.sort === 'popular') {
+            // Most Reviews first
+            return bReviews - aReviews;
+          } else {
+            // Highest Rated first
+            return bRating - aRating;
+          }
+        });
+        
+        // Clear and re-append sorted items
+        trailsList.innerHTML = '';
+        items.forEach(item => trailsList.appendChild(item));
+      });
+    });
+  });
+</script>
+</body>
 </html>

@@ -11,6 +11,17 @@ DROP TABLE IF EXISTS achievements CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 -- Create tables (order matters for foreign keys)
+
+CREATE TABLE trails 
+(
+    -- average_rating DECIMAL,
+    -- difficulty VARCHAR(100) CONSTRAINT limited_values CHECK (difficulty in ('easy', 'moderate', 'difficult', 'very_difficult')),
+    -- discription VARCHAR(200) NOT NULL,
+    -- distance DECIMAL,
+    -- location VARCHAR(100) NOT NULL,
+    trail_name VARCHAR(100) NOT NULL,
+    trail_id SERIAL PRIMARY KEY
+);
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(30) NOT NULL,
@@ -25,7 +36,10 @@ CREATE TABLE achievements (
 
 CREATE TABLE reviews (
   review_id SERIAL PRIMARY KEY,
-  trail_name VARCHAR(255) NOT NULL,
+  trail_id INTEGER REFERENCES trails(trail_id),
+  user_id INTEGER REFERENCES users(user_id),
+
+--   trail_name VARCHAR(255) NOT NULL,
   rating INTEGER NOT NULL,
   written_review TEXT NOT NULL
 --   user_id INT REFERENCES users(user_id)

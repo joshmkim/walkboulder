@@ -14,12 +14,27 @@ const axios = require('axios'); // To make HTTP requests from other APIs
 // ------------- connecting to DB and adding handlebars -------------------------------
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
-const hbs = handlebars.create({
+// const hbs = handlebars.create({
+//     extname: 'hbs',
+//     layoutsDir: __dirname + '/views/layouts',
+//     partialsDir: __dirname + '/views/partials',
+//   });
+  const hbs = handlebars.create({
     extname: 'hbs',
     layoutsDir: __dirname + '/views/layouts',
     partialsDir: __dirname + '/views/partials',
-  });
-  
+    helpers: {
+        // Add this helper for star ratings
+        times: function(n, block) {
+            let accum = '';
+            for (let i = 0; i < n; ++i) {
+                accum += block.fn(i);
+            }
+            return accum;
+        }
+    }
+});
+
   // database configuration
   const dbConfig = {
     host: 'db', // the database server
@@ -201,41 +216,256 @@ app.use(auth); // I would advise putting routes like reviews and group walks AFT
 
 
 
-  app.get('/reviews', async (req, res) => {
-    const { trail_name, rating, written_review } = req.body;
-    const userId = req.session.user.user_id;
-    try {
-        // Fetch all reviews from the database
-        const result = await db.any(`SELECT * FROM reviews`);
-        // If no reviews exist, result.rows will be an empty array
-        // const reviews = result.rows;
-        console.log('results:', result);
-        // Render the reviews page with the reviews data (empty array if no reviews)
-        res.render('pages/reviews', { result });
-    } catch (error) {
-        console.error('Error fetching reviews:', error);
-        res.status(500).send('Error fetching reviews');
-    }
-});
-app.post('/submit-review', async (req, res) => {
-  console.log(req.body);  // This will show the data being submitted from the form
-  const { trail_name, rating, written_review } = req.body;
-  console.log('Review Data:', { trail_name, rating, written_review });  // Log review data
+//   app.get('/reviews', async (req, res) => {
+//     const { trail_name, rating, written_review } = req.body;
+//     const userId = req.session.user.user_id;
+//     try {
+//         // Fetch all reviews from the database
+//         const result = await db.any(`SELECT * FROM reviews`);
+//         // If no reviews exist, result.rows will be an empty array
+//         // const reviews = result.rows;
+//         console.log('results:', result);
+//         // Render the reviews page with the reviews data (empty array if no reviews)
+//         res.render('pages/reviews', { result });
+//     } catch (error) {
+//         console.error('Error fetching reviews:', error);
+//         res.status(500).send('Error fetching reviews');
+//     }
+// });
 
+// app.get('/reviews', async (req, res) => {
+//   try {
+//     const trails = await db.any('SELECT * FROM trails');
 
+//     const reviews = await db.any(`
+//       SELECT 
+//   reviews.review_id, 
+//   reviews.rating, 
+//   reviews.written_review, 
+//   users.username, 
+//   trails.trail_name
+// FROM reviews
+// JOIN users ON reviews.user_id = users.user_id
+// JOIN trails ON reviews.trail_id = trails.trail_id;
+//     `);
+//     console.log('Fetched Reviews:', reviews); // ✅ Make sure this logs real data
+
+//     res.render('pages/reviews', { reviews, trails });
+//   } catch (error) {
+//     console.error('Error loading reviews or trails:', error);
+//     res.status(500).send('Failed to load reviews');
+//   }
+// });
+// app.get('/reviews', async (req, res) => {
+//   try {
+//     const rows = await db.any(`
+//       SELECT 
+//         reviews.review_id, 
+//         reviews.rating, 
+//         reviews.written_review, 
+//         users.username, 
+//         trails.trail_name
+//       FROM reviews
+//       JOIN users ON reviews.user_id = users.user_id
+//       JOIN trails ON reviews.trail_id = trails.trail_id;
+//     `);
+
+//     // Group reviews by trail_name
+//     const reviewsByTrail = {};
+
+//     rows.forEach(row => {
+//       if (!reviewsByTrail[row.trail_name]) {
+//         reviewsByTrail[row.trail_name] = [];
+//       }
+//       reviewsByTrail[row.trail_name].push({
+//         username: row.username,
+//         rating: row.rating,
+//         written_review: row.written_review,
+//       });
+//     });
+
+//     res.render('pages/reviews', { reviewsByTrail });
+//   } catch (error) {
+//     console.error('Error fetching grouped reviews:', error);
+//     res.status(500).send('Internal server error');
+//   }
+// });
+// app.get('/reviews', async (req, res) => {
+//   try {
+//     // First get all trails for the review form dropdown
+//     const trails = await db.any('SELECT * FROM trails');
+    
+//     // Get all reviews with trail and user info
+//     const reviews = await db.any(`
+//       SELECT 
+//         reviews.review_id, 
+//         reviews.rating, 
+//         reviews.written_review, 
+//         users.username, 
+//         trails.trail_name
+//       FROM reviews
+//       JOIN users ON reviews.user_id = users.user_id
+//       JOIN trails ON reviews.trail_id = trails.trail_id
+//       ORDER BY trails.trail_name, reviews.review_id
+//     `);
+
+//     // Group reviews by trail
+//     const groupedReviews = {};
+//     reviews.forEach(review => {
+//       if (!groupedReviews[review.trail_name]) {
+//         groupedReviews[review.trail_name] = [];
+//       }
+//       groupedReviews[review.trail_name].push(review);
+//     });
+
+//     res.render('pages/reviews', { 
+//       groupedReviews: groupedReviews,
+//       trails: trails 
+//     });
+//   } catch (error) {
+//     console.error('Error loading reviews:', error);
+//     res.status(500).send('Failed to load reviews');
+//   }
+// });
+// app.get('/reviews', async (req, res) => {
+//   try {
+//     // Get trails with average ratings and review counts
+//     const trails = await db.any(`
+//       SELECT 
+//         t.trail_id,
+//         t.trail_name,
+//         COALESCE(AVG(r.rating), 0) AS avg_rating,
+//         COUNT(r.review_id) AS review_count
+//       FROM trails t
+//       LEFT JOIN reviews r ON t.trail_id = r.trail_id
+//       GROUP BY t.trail_id
+//       ORDER BY review_count DESC, avg_rating DESC
+//     `);
+
+//     // Get all reviews with user info
+//     const allReviews = await db.any(`
+//       SELECT 
+//         r.review_id,
+//         r.trail_id,
+//         r.rating,
+//         r.written_review,
+//         u.username
+//       FROM reviews r
+//       JOIN users u ON r.user_id = u.user_id
+//     `);
+
+//     // Group reviews by trail_id
+//     const reviewsByTrail = {};
+//     allReviews.forEach(review => {
+//       if (!reviewsByTrail[review.trail_id]) {
+//         reviewsByTrail[review.trail_id] = [];
+//       }
+//       reviewsByTrail[review.trail_id].push(review);
+//     });
+
+//     res.render('pages/reviews', { 
+//       trails: trails.map(trail => ({
+//         ...trail,
+//         avg_rating: parseFloat(trail.avg_rating).toFixed(1),
+//         reviews: reviewsByTrail[trail.trail_id] || []
+//       })),
+//       sortBy: 'popular' // default sort
+//     });
+//   } catch (error) {
+//     console.error('Error loading reviews:', error);
+//     res.status(500).send('Failed to load reviews');
+//   }
+// });
+app.get('/reviews', async (req, res) => {
   try {
-      await db.query('INSERT INTO reviews (trail_name, rating, written_review) VALUES ($1, $2, $3)',
-          [trail_name, rating, written_review]);
-          console.log('Review Data:', { trail_name, rating, written_review });  // Log review data
+    // Get all trails first (for the modal dropdown)
+    const allTrails = await db.any('SELECT * FROM trails');
 
-          res.redirect('/reviews');
+    // Get trails with average ratings and review counts
+    const trailsWithStats = await db.any(`
+      SELECT 
+        t.trail_id,
+        t.trail_name,
+        COALESCE(AVG(r.rating), 0) AS avg_rating,
+        COUNT(r.review_id) AS review_count
+      FROM trails t
+      LEFT JOIN reviews r ON t.trail_id = r.trail_id
+      GROUP BY t.trail_id
+      ORDER BY review_count DESC, avg_rating DESC
+    `);
 
-      // res.status(200).json({ message: 'Review saved successfully' });
+    // Get all reviews with user info
+    const allReviews = await db.any(`
+      SELECT 
+        r.review_id,
+        r.trail_id,
+        r.rating,
+        r.written_review,
+        u.username
+      FROM reviews r
+      JOIN users u ON r.user_id = u.user_id
+    `);
+
+    // Group reviews by trail_id
+    const reviewsByTrail = {};
+    allReviews.forEach(review => {
+      if (!reviewsByTrail[review.trail_id]) {
+        reviewsByTrail[review.trail_id] = [];
+      }
+      reviewsByTrail[review.trail_id].push(review);
+    });
+
+    res.render('pages/reviews', { 
+      trails: trailsWithStats.map(trail => ({
+        ...trail,
+        avg_rating: parseFloat(trail.avg_rating).toFixed(1),
+        reviews: reviewsByTrail[trail.trail_id] || []
+      })),
+      allTrails: allTrails, // Pass all trails separately for the modal
+      sortBy: 'popular' // default sort
+    });
   } catch (error) {
-      console.error('Error saving review:', error);
-      res.status(500).json({ error: 'Failed to save review' });
+    console.error('Error loading reviews:', error);
+    res.status(500).send('Failed to load reviews');
   }
 });
+// app.post('/submit-review', async (req, res) => {
+//   console.log(req.body);  // This will show the data being submitted from the form
+//   const { trail_name, rating, written_review } = req.body;
+//   console.log('Review Data:', { trail_name, rating, written_review });  // Log review data
+
+
+//   try {
+//       await db.query('INSERT INTO reviews (trail_name, rating, written_review) VALUES ($1, $2, $3)',
+//           [trail_name, rating, written_review]);
+//           console.log('Review Data:', { trail_name, rating, written_review });  // Log review data
+
+//           res.redirect('/reviews');
+
+//       // res.status(200).json({ message: 'Review saved successfully' });
+//   } catch (error) {
+//       console.error('Error saving review:', error);
+//       res.status(500).json({ error: 'Failed to save review' });
+//   }
+// });
+
+app.post('/submit-review', async (req, res) => {
+  const { trail_id, rating, written_review } = req.body;
+  const userId = req.session.user.user_id;
+
+  try {
+    await db.none(
+      'INSERT INTO reviews (trail_id, user_id, rating, written_review) VALUES ($1, $2, $3, $4)',
+      [trail_id, userId, parseFloat(rating), written_review]
+    );
+
+    res.redirect('/reviews');
+  } catch (error) {
+    console.error('Error saving review:', error);
+    res.status(500).send('Failed to save review');
+  }
+});
+
 
 
 
