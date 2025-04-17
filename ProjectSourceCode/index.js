@@ -217,9 +217,30 @@ app.get('/profile', async (req, res) => {
     const userId = req.session.userId;
 
     // achievements
-    const achievementQuery = `SELECT username FROM users`; // `SELECT achievement_url, achievement_url FROM achievements`
-    const achievements = await db.any(achievementQuery);
-    
+    // Check if user has taken their first walk
+    const firstWalk = await db.oneOrNone(
+      `SELECT 1 FROM user_to_history WHERE username = $1 LIMIT 1`,
+      [userId]
+    );
+
+    // Check if user has added their first friend
+    const firstFriend = await db.oneOrNone(
+      `SELECT 1 FROM user_to_friend WHERE username = $1 LIMIT 1`,
+      [userId]
+    );
+
+    // Check if user has left their first review
+    const firstReview = await db.oneOrNone(
+      `SELECT 1 FROM reviews WHERE username = $1 LIMIT 1`,
+      [userId]
+    );
+
+    // Collect earned achievements
+    const achievements = [];
+    if (firstWalk) achievements.push({ title: "Take your first walk" });
+    if (firstFriend) achievements.push({ title: "Add your first friend" });
+    if (firstReview) achievements.push({ title: "Leave your first review" });
+
     // friends
     const friendQuery = `SELECT users.username 
                          FROM users 
@@ -236,8 +257,10 @@ app.get('/profile', async (req, res) => {
                               LIMIT 3`;
     const recentWalks = await db.any(recentWalksQuery, [userId]);
 
-    // for debugging
+    // for debugging purposes
     console.log(achievements);
+    console.log(friends);
+    console.log(recentWalks);
     
     const user = req.session.user;
     const userData = {
@@ -306,6 +329,51 @@ app.get('/avatar/:userId', async (req, res) => {
     res.status(500).send('Server error.');
   }
 });
+
+// Friend Search
+app.post('/add-friend', async (req, res) => {
+  const currentUserId = req.session.userId;
+  const searchTerm = req.body.search;
+
+  // Find the user by username
+  const userResult = await db.query(
+    'SELECT user_id FROM users WHERE username = $1 AND user_id != $2',
+    [searchTerm, currentUserId]
+  );
+
+  if (userResult.rows.length === 0) {
+    return res.send('User not found or already added.');
+  }
+
+  const friendId = userResult.rows[0].user_id;
+
+  // Check if already friends
+  const existing = await db.query(
+    'SELECT * FROM user_to_friend WHERE user_id = $1 AND friend_id = $2',
+    [currentUserId, friendId]
+  );
+
+  if (existing.rows.length === 0) {
+    // Add to user_to_friend
+
+    // if we want to make it one way
+      // await db.query(
+      //   'INSERT INTO user_to_friend (user_id, friend_id) VALUES ($1, $2)',
+      //   [currentUserId, friendId]
+      // );
+
+    // to make it bidirectional
+    await db.query(
+      `INSERT INTO user_to_friend (user_id, friend_id)
+       VALUES ($1, $2), ($2, $1)
+       ON CONFLICT DO NOTHING`,
+      [currentUserId, friendId]
+    );
+  }
+
+  res.redirect('/profile');
+});
+
 
 // --------------------------------------- SETTINGS ENDPOINTS ------------------------------------------------------------------
 

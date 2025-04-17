@@ -111,19 +111,6 @@
         <p class="bio-text text-muted">This user hasn’t written a bio yet.</p>
       {{/if}}
 
-      {{!-- <!-- Friends -->
-      <div class="Friend-box mt-4 text-start">
-        <h5 class="mb-3">Friends</h5>
-        {{#if userData.friends.length}}
-          <ul class="list-unstyled">
-            {{#each userData.friends}}
-              <li class="mb-2">🏆 {{this.username}}</li>
-            {{/each}}
-          </ul>
-        {{else}}
-          <p class="text-muted">No friends yet.</p>
-        {{/if}}
-      </div> --}}
       <!-- Friends Section -->
       <div class="friends-box mt-4 text-start">
         <h5 class="mb-3">Friends</h5>
@@ -139,6 +126,44 @@
         {{else}}
           <p class="text-muted">You don't have any friends added yet.</p>
         {{/if}}
+
+        <!-- Find Friends Button -->
+        <button class="custom-btn mt-3" data-bs-toggle="modal" data-bs-target="#findFriendsModal">
+          Find Friends
+        </button>
+
+        <!-- Find Friends Modal -->
+        {{!-- <div class="modal fade" id="findFriendsModal" tabindex="-1" aria-labelledby="findFriendsModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-3">
+              <div class="modal-header">
+                <h5 class="modal-title" id="findFriendsModalLabel">Search Users</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+
+              <div class="modal-body">
+                <input type="text" id="friendSearchInput" class="form-control mb-3" placeholder="Enter username">
+                <div id="searchResults"></div> <!-- Results will be populated here -->
+              </div>
+            </div>
+          </div>
+        </div>         --}}
+        <div class="modal fade" id="findFriendsModal" tabindex="-1" aria-labelledby="findFriendsModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-3">
+              <div class="modal-header">
+                <h5 class="modal-title" id="findFriendsModalLabel">Search Users</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form action="/add-friend" method="POST">
+                <div class="modal-body">
+                  <input type="text" name="search" class="form-control mb-3" placeholder="Enter username">
+                  <button type="submit" class="btn btn-primary">Add Friend</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Recent Walks -->
@@ -157,19 +182,13 @@
         {{/if}}
       </div>
 
-      {{!-- <!--Achievements-->
-      <div class="container">
-      {{#each userData.achievements}}
-        <p>{{this.username}}</p>
-      {{/each}}
-      </div> --}}
       <!-- Achievements -->
       <div class="achievements-box mt-4 text-start">
         <h5 class="mb-3">Achievements</h5>
         {{#if userData.achievements.length}}
           <ul class="list-unstyled">
             {{#each userData.achievements}}
-              <li class="mb-2">🏆 {{this.username}}</li>
+              <li class="mb-2">🏆 {{this.title}}</li>
             {{/each}}
           </ul>
         {{else}}

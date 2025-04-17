@@ -132,3 +132,10 @@ CREATE TRIGGER mutual_friendship
 AFTER INSERT ON user_to_friend
 FOR EACH ROW
 EXECUTE FUNCTION make_friendship_mutual();
+
+-- Fixed achievements:
+INSERT INTO achievements (achievements_id, achievements_url, achievements_caption)
+    VALUES
+    (1, '', 'Record your first walk'),
+    (2, '', 'Add your first friend'),
+    (3, '', 'Leave your first review'); 
