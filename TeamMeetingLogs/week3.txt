@@ -1,0 +1,24 @@
+Isabelle
+This Week - worked on sql testing this week and got some of it working 
+Next week - will work on moving the database to the profile page and integrate it fully. 
+
+Inaki 
+This week - Added google maps api, worked on implementation for trails and routing for going to and from trails 
+Next week - Work on adding routes to database and finishing routes implementation 
+
+Jack - 
+
+This week - Worked with Inaki, added google maps api, worked on implementation for trails and routing for going to and from trails 
+Next week - Work on adding routes to database and finishing routes implementation 
+
+Josh - 
+This week - Profile Page, implemented everything except the friends page including icon, name, bio, options to change settings, waiting on route data,
+Next week - Working on implementing images for database for social aspect 
+
+Eddie -
+This week - Working on reviews page for trails, styling to reviws page  
+Next week - Work on connecting trails to reviews 
+
+Parth - 
+This week - styling home, register, login 
+Next week - Database for trails 
