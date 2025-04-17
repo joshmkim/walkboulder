@@ -6,72 +6,164 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
   body {
-    background-color: #f8f9fa;
-    font-family: sans-serif;
+    background-image: url('https://plus.unsplash.com/premium_photo-1744888432880-1b9c6fb1f612?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: #f0f2f5;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1a1a1a;
+    min-height: 100vh;
   }
 
   .profile-card {
-    background-color: #fff;
-    max-width: 500px;
-    margin: 3rem auto; /* Added top margin */
-    padding: 2rem;
-    border: 1px solid #ccc;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 3rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-    .avatar {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      margin: 0 auto;
-      border-radius: 50%;
-      display: block;
-    }
+  .profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .avatar {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    display: block;
+    border: 4px solid #fff;
+    box-shadow: 0 0 0 2px #e5e7eb;
+    transition: transform 0.3s ease;
+  }
+
+  .avatar:hover {
+    transform: scale(1.05);
+  }
 
   h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #111827;
+    letter-spacing: -0.025em;
   }
 
   .bio-text {
-    font-size: 1rem;
-    color: #555;
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: #4b5563;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
   }
 
-    .custom-btn {
-      display: inline-block;
-      padding: 0.4rem 1rem;
-      font-size: 0.95rem;
-      background-color: #000;
-      color: white;
-      border: 1px solid #000;
-      border-radius: 5px;
-      text-decoration: none;
-      margin-top: 0.3rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
+  .actions-container {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
 
-  .custom-btn:hover {
-    background-color: #333;
+  .custom-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .custom-btn::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .custom-btn:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .custom-btn.primary {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .custom-btn.primary:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
   }
 
   .custom-btn.secondary {
     background-color: white;
-    color: black;
+    color: #1f2937;
+    border: 2px solid #e5e7eb;
   }
 
   .custom-btn.secondary:hover {
-    background-color: #eee;
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: #10b981;
+    color: white;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .profile-card {
+      margin: 2rem 1rem;
+      padding: 2rem;
+    }
+
+    .actions-container {
+      flex-direction: column;
+    }
+
+    .custom-btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>
-
 </head>
 <body>
   <div class="container text-center">
     <div class="profile-card">
       <!-- Avatar Image -->
-        <img src="{{userData.avatar}}" alt="Profile picture" class="avatar" id="avatarPreview">
+      <img src="{{userData.avatar}}" alt="Profile picture" class="avatar" id="avatarPreview">
+
+      <!-- Online Status -->
+      {{#if userData.isOnline}}
+        <div class="status-badge">Online</div>
+      {{/if}}
 
       <!-- User Name -->
       <h2>{{userData.name}}</h2>
@@ -80,12 +172,12 @@
       {{#if userData.bio}}
         <p class="bio-text">{{userData.bio}}</p>
       {{else}}
-        <p class="bio-text text-muted">This user hasn’t written a bio yet.</p>
+        <p class="bio-text text-muted">This user hasn't written a bio yet.</p>
       {{/if}}
 
       <!-- Action Buttons -->
-      <div class="mt-4">
-        <a href="/settings" class="custom-btn">Edit Profile</a>
+      <div class="actions-container">
+        <a href="/settings" class="custom-btn primary">Edit Profile</a>
         <a href="/logout" class="custom-btn secondary">Logout</a>
       </div>
     </div>
