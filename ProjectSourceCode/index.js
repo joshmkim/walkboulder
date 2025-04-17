@@ -1,57 +1,53 @@
 // ---------------- dependencies -----------------------------------------------------------
 
-const express = require('express'); // building API server
+const express = require('express');
 const app = express();
 const handlebars = require('express-handlebars');
 const Handlebars = require('handlebars');
 const path = require('path');
-const pgp = require('pg-promise')(); // connection to postgres server
+const pgp = require('pg-promise')();
 const bodyParser = require('body-parser');
-const session = require('express-session'); // setting session object to allow user session through a login.
-const bcrypt = require('bcryptjs'); //  To hash passwords
-const axios = require('axios'); // To make HTTP requests from other APIs
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
+const axios = require('axios');
 const multer = require('multer');
-
+const FileType = require('file-type');
 
 // ------------- connecting to DB and adding handlebars -------------------------------
 
-// create `ExpressHandlebars` instance and configure the layouts and partials dir.
 const hbs = handlebars.create({
-    extname: 'hbs',
-    layoutsDir: __dirname + '/views/layouts',
-    partialsDir: __dirname + '/views/partials',
+  extname: 'hbs',
+  layoutsDir: __dirname + '/views/layouts',
+  partialsDir: __dirname + '/views/partials',
+});
+
+app.use(express.static(path.join(__dirname, '/walkboulder/ProjectSourceCode/views/styles')));
+
+const dbConfig = {
+  host: 'db',
+  port: 5432,
+  database: process.env.POSTGRES_DB,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+};
+
+const db = pgp(dbConfig);
+
+db.connect()
+  .then(obj => {
+    console.log('Database connection successful');
+    obj.done();
+  })
+  .catch(error => {
+    console.log('ERROR:', error.message || error);
   });
-  
-  // database configuration
-  const dbConfig = {
-    host: 'db', // the database server
-    port: 5432, // the database port
-    database: process.env.POSTGRES_DB, // the database name
-    user: process.env.POSTGRES_USER, // the user account to connect with
-    password: process.env.POSTGRES_PASSWORD, // the password of the user account
-  };
-  
-  const db = pgp(dbConfig);
-  
-  // test your database
-  db.connect()
-    .then(obj => {
-      console.log('Database connection successful'); // you can view this message in the docker compose logs
-      obj.done(); // success, release the connection;
-    })
-    .catch(error => {
-      console.log('ERROR:', error.message || error);
-    });
 
 // ------- App Settings --------
 
-// Register `hbs` as our view engine using its bound `engine()` function.
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
-
-// initialize session variables
+app.use(bodyParser.json());
 
 app.use(
   session({
@@ -60,6 +56,8 @@ app.use(
     resave: false,
   })
 );
+
+app.use(express.static(path.join(__dirname, 'resources')));
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -72,205 +70,137 @@ app.use(
   })
 );
 
-// --------------------- put APIs here --------------------------------------
+// --------------------- Routes --------------------------------------
 
 app.get('/welcome', (req, res) => {
-  res.json({status: 'success', message: 'Welcome!'});
+  res.json({ status: 'success', message: 'Welcome!' });
 });
 
-
-// Google Maps API key AIzaSyBFJWukbwIMrbF7mwJFtuY06XHvlvF95I4
-
-app.get('/', (req, res) =>
-{
-    res.render('pages/home')
+app.get('/', (req, res) => {
+  res.render('pages/home');
 });
 
-app.get('/maps', (req, res) =>
-{
-  res.render('pages/maps')
-})
+app.get('/maps', (req, res) => {
+  res.render('pages/maps');
+});
 
 // ---------- LOGIN/LOGOUT/REGISTER ----------------------------------------
 
-//register 
-
 app.get('/register', (req, res) => {
-  res.render('pages/register')
+  res.render('pages/register');
 });
 
 app.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    // 1. Check if the username length exceeds 30 characters
     if (username.length > 30) {
-      return res.status(400).render('pages/register', { 
-        message: 'Username cannot be longer than 30 characters', 
-        error: true 
+      return res.status(400).render('pages/register', {
+        message: 'Username cannot be longer than 30 characters',
+        error: true,
       });
     }
 
-    // 2. Check if user already exists
-    const userExists = await db.oneOrNone(
-      'SELECT 1 FROM users WHERE username = $1', 
-      [username]
-    );
-
+    const userExists = await db.oneOrNone('SELECT 1 FROM users WHERE username = $1', [username]);
     if (userExists) {
       return res.render('pages/register', {
         message: 'Username already taken',
-        error: true
+        error: true,
       });
     }
 
-    // 3. Hash password and create user
-    const hash = await bcrypt.hash(password, 12); // Increased salt rounds
-    await db.none(
-      'INSERT INTO users (username, password) VALUES ($1, $2)',
-      [username, hash]
-    );
+    const hash = await bcrypt.hash(password, 12);
+    await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hash]);
 
-    // 4. Auto-login after registration
-    const newUser = await db.one(
-      'SELECT * FROM users WHERE username = $1',
-      [username]
-    );
-    
+    const newUser = await db.one('SELECT * FROM users WHERE username = $1', [username]);
     req.session.user = newUser;
     return res.redirect('/');
-
   } catch (error) {
     console.error('Registration error:', error);
-    
-    // Specific error for unique violation
     if (error.code === '23505') {
       return res.render('pages/register', {
         message: 'Username already taken',
-        error: true
+        error: true,
       });
     }
-    
-    // Generic error for other cases
     return res.render('pages/register', {
       message: 'Registration failed. Please try again.',
-      error: true
+      error: true,
     });
   }
 });
 
-
-// login
-
 app.get('/login', (req, res) => {
-  res.render('pages/login')
+  res.render('pages/login');
 });
 
 app.post('/login', async (req, res) => {
   const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);
-  if (!user) 
-  {
-      return res.render('pages/login', {message: 'Incorrect username or password.',error: true,});
-  }
-  const match = await bcrypt.compare(req.body.password, user.password);
-  if (!match) 
-  {
-      return res.render('pages/login', {message: 'Incorrect username or password.',error: true,});
+  if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+    return res.render('pages/login', {
+      message: 'Incorrect username or password.',
+      error: true,
+    });
   }
   req.session.user = user;
   req.session.save();
   res.redirect('/');
 });
-  
-const auth = (req, res, next) => {
-if (!req.session.user) {
-return res.redirect('/login');
-}
-next();
-};
 
-// logout
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+  next();
+};
 
 app.get('/logout', (req, res) => {
   req.session.destroy(err => {
-      if (err) {
-          return res.render('/', {message: 'Logout was not successful',error: true,});
-      }
-      return res.render('pages/logout', {message: 'Logout was successful!',error: false});
+    if (err) {
+      return res.render('/', { message: 'Logout was not successful', error: true });
+    }
+    return res.render('pages/logout', { message: 'Logout was successful!', error: false });
   });
 });
 
-
-
-// Authentication Required
-app.use(auth); // I would advise putting routes like reviews and group walks AFTER this auth as I think users should have to login before they are allowed to post reviews or go on group walks
+app.use(auth);
 
 // --------------------------------------- PROFILE ENDPOINTS ------------------------------------------------------------------
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.get('/profile', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
-
   const user = req.session.user;
   const userData = {
     name: user.username,
     avatar: `/avatar/${user.user_id}`,
     bio: user.bio || "This user hasn’t written a bio yet."
   };
-
   res.render('pages/profile', { userData });
 });
 
-// Uploading avatars
 app.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
   try {
     const userId = req.session.user?.user_id;
-    if (!userId) {
-      return res.status(401).send('Unauthorized');
-    }
-
-    if (!req.file) {
-      return res.status(400).send('No file uploaded.');
-    }
-
-    const avatarBuffer = req.file.buffer;
-
-    await db.query(
-      'UPDATE users SET avatar = $1 WHERE user_id = $2',
-      [avatarBuffer, userId]
-    );
-
-    const updatedUser = await db.one(
-      'SELECT * FROM users WHERE user_id = $1',
-      [userId]
-    );
+    if (!userId || !req.file) return res.status(400).send('Missing user or file.');
+    await db.query('UPDATE users SET avatar = $1 WHERE user_id = $2', [req.file.buffer, userId]);
+    const updatedUser = await db.one('SELECT * FROM users WHERE user_id = $1', [userId]);
     req.session.user = updatedUser;
-
     res.redirect('/settings');
   } catch (err) {
     res.status(500).send('Server error while uploading avatar.');
   }
 });
 
-// Fetching avatars
-const FileType = require('file-type');
 app.get('/avatar/:userId', async (req, res) => {
   try {
     const userId = parseInt(req.params.userId, 10);
     const rows = await db.any('SELECT avatar FROM users WHERE user_id = $1', [userId]);
-
     if (!rows.length || !rows[0].avatar) {
       return res.redirect('https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg');
     }
-
-    const avatarBuffer = rows[0].avatar;
-
-    const fileType = await FileType.fromBuffer(avatarBuffer);
+    const fileType = await FileType.fromBuffer(rows[0].avatar);
     res.set('Content-Type', fileType?.mime || 'application/octet-stream');
-    res.send(avatarBuffer);
+    res.send(rows[0].avatar);
   } catch (err) {
     res.status(500).send('Server error.');
   }
@@ -279,10 +209,6 @@ app.get('/avatar/:userId', async (req, res) => {
 // --------------------------------------- SETTINGS ENDPOINTS ------------------------------------------------------------------
 
 app.get('/settings', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
-
   const user = req.session.user;
   const userData = {
     username: user.username,
@@ -293,15 +219,10 @@ app.get('/settings', (req, res) => {
     firstname: user.firstname || "",
     lastname: user.lastname || ""
   };
-
-  res.render('pages/settings', {userData});
+  res.render('pages/settings', { userData });
 });
 
 app.post('/settings', async (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
-
   const {
     username,
     firstname,
@@ -311,50 +232,22 @@ app.post('/settings', async (req, res) => {
     newPassword,
     confirmPassword
   } = req.body;
-
   try {
     const userId = req.session.user.user_id;
-
-    // Get latest session user from DB for fresh state
     const currentUser = await db.one('SELECT * FROM users WHERE user_id = $1', [userId]);
 
-    // Check if password update is requested
     if (newPassword || confirmPassword) {
-      if (!currentPassword) {
-        return res.render('pages/settings', {
-          userData: currentUser,
-          message: 'Please enter your current password.',
-          error: true
-        });
+      if (!currentPassword || !(await bcrypt.compare(currentPassword, currentUser.password))) {
+        return res.render('pages/settings', { userData: currentUser, message: 'Current password is incorrect.', error: true });
       }
-
-      const isMatch = await bcrypt.compare(currentPassword, currentUser.password);
-      if (!isMatch) {
-        return res.render('pages/settings', {
-          userData: currentUser,
-          message: 'Current password is incorrect.',
-          error: true
-        });
-      }
-
       if (newPassword !== confirmPassword) {
-        return res.render('pages/settings', {
-          userData: currentUser,
-          message: 'New passwords do not match.',
-          error: true
-        });
+        return res.render('pages/settings', { userData: currentUser, message: 'New passwords do not match.', error: true });
       }
-
       const hashedPassword = await bcrypt.hash(newPassword, 12);
       await db.none('UPDATE users SET password = $1 WHERE user_id = $2', [hashedPassword, userId]);
     }
 
-    await db.none(
-      `UPDATE users 
-       SET username = $1, firstname = $2, lastname = $3, email = $4 
-       WHERE user_id = $5`,
-      [username, firstname, lastname, email, userId]
-    );
+    await db.none('UPDATE users SET username = $1, firstname = $2, lastname = $3, email = $4 WHERE user_id = $5', [username, firstname, lastname, email, userId]);
 
     const updatedUser = await db.one('SELECT * FROM users WHERE user_id = $1', [userId]);
     req.session.user = updatedUser;
@@ -368,8 +261,6 @@ app.post('/settings', async (req, res) => {
       message: 'Settings updated successfully!',
       error: false
     });
-    
-
   } catch (err) {
     console.error(err);
     res.render('pages/settings', {
@@ -380,18 +271,7 @@ app.post('/settings', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
 // ----------------------- starting the server -----------------------
-
 
 const server = app.listen(3000, () => {
   console.log("Server is running on port 3000");

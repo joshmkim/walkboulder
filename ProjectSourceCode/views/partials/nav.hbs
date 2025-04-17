@@ -1,55 +1,143 @@
-<header>
-  <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom shadow-sm">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page</title>
+    
+    <!-- Internal CSS Styles -->
+    <style>
+        /* Navbar Styles */
+        .navbar {
+            transition: all 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
+
+        /* Initial transparent state */
+        .navbar.navbar-transparent {
+            background-color: transparent !important;
+            box-shadow: none;
+        }
+
+        /* Scrolled solid state */
+        .navbar.navbar-solid {
+            background-color: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Navbar link colors */
+        .navbar-transparent .nav-link {
+            color: white !important;
+        }
+
+        .navbar-transparent .navbar-brand {
+            color: white !important;
+        }
+
+        /* When scrolled, change link colors */
+        .navbar-solid .nav-link {
+            color: #333 !important;
+        }
+
+        .navbar-solid .navbar-brand {
+            color: #333 !important;
+        }
+
+        /* Login button special styling */
+        .navbar-transparent .login-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 8px 16px;
+            color: white !important;
+        }
+
+        .navbar-solid .login-button {
+            background-color: #4a90e2;
+            color: white !important;
+        }
+
+        /* Add padding to body to account for fixed navbar */
+        body {
+            padding-top: 56px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Your Navbar -->
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light navbar-transparent">
+            <div class="container">
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+                    <img src="https://icon-library.com/images/walk-icon-png/walk-icon-png-14.jpg" style="height: 40px;" />
+                    WalkBoulder
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbar-collapse">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/">Home</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/maps">Maps</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/profile">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/settings">Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/logout">Logout</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link login-button" href="/login">Login</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Your page content here -->
     <div class="container">
-
-      <!-- Sitename -->
-      <a class="navbar-brand fw-bold">WalkBoulder</a>
-
-      <!-- Navbar Toggler -->
-      <button 
-        class="navbar-toggler" 
-        type="button" 
-        data-bs-toggle="collapse" 
-        data-bs-target="#navbar-collapse" 
-        aria-controls="navbar-collapse" 
-        aria-expanded="false" 
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- Home Link -->
-      <div class="collapse navbar-collapse" id="navbar-collapse">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/">Home</a>
-          </li>
-        </ul>
-
-        <!-- Right side Links -->
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/maps">Maps</a>
-          </li>
-          {{#if user}}
-            <!-- Show these when logged in -->
-            <li class="nav-item">
-              <a class="nav-link fw-medium" href="/profile">Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link fw-medium" href="/settings">Settings</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link fw-medium" href="/logout">Logout</a>
-            </li>
-          {{else}}
-            <!-- Show these when logged out -->
-            <li class="nav-item">
-              <a class="nav-link fw-medium" href="/login">Login</a>
-            </li>
-          {{/if}}
-        </ul>
-      </div>
-
+        <!-- Content goes here -->
     </div>
-  </nav>
-</header>
+
+    <!-- JavaScript for scroll effect -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.querySelector('.navbar');
+            
+            // Set initial state
+            if (window.scrollY === 0) {
+                navbar.classList.add('navbar-transparent');
+                navbar.classList.remove('navbar-solid');
+            } else {
+                navbar.classList.add('navbar-solid');
+                navbar.classList.remove('navbar-transparent');
+            }
+            
+            // Change state on scroll
+            window.addEventListener('scroll', function() {
+                if (window.scrollY === 0) {
+                    navbar.classList.add('navbar-transparent');
+                    navbar.classList.remove('navbar-solid');
+                } else {
+                    navbar.classList.add('navbar-solid');
+                    navbar.classList.remove('navbar-transparent');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

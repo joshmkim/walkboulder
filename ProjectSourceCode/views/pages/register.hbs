@@ -1,29 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Register</title>
-</head>
-<body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - WalkBoulder</title>
+    <style>
 
-    <div class="container mt-5">
-        <h2 class="text-center">Register</h2>
-        {{> message}}
-        <form action="/register" method="POST" class="mt-4">
-            <div class="mb-3">
-                <label for="username" class="form-label">Username:</label>
-                <input type="username" class="form-control" id="username" name="username" required>
+        {{!-- nav {
+            display: none !important;
+        } --}}
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('https://images.unsplash.com/photo-1501554728187-ce583db33af7?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-header h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .login-button:hover {
+            background-color: #3a7bc8;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+        }
+
+        .login-footer a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Create an account</h2>
+            <p>Join us and start exploring</p>
+        </div>
+
+
+        <form action="/register" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password:</label>
+            <div class="form-group">
+                <label for="password">Password</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="login-button">Register</button>
         </form>
 
-        <div class="text-center mt-3">
+        <div class="login-footer">
             <p>Already have an account? <a href="/login">Login here</a></p>
+            <!-- Include your message partial if needed -->
+            {{> message}}
         </div>
     </div>
-
 </body>
 </html>

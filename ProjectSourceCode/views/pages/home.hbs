@@ -1,36 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Walk Boulder</title>
+<div class="min-h-screen">
 
-  <link rel="stylesheet" href="../styles/style.css">
-</head>
-<body>
-]
-
-
-  <div class="container">
-    <h1>WALK BOULDER</h1>
-    <p>WalkBoulder is a free web-mapping hand application that can be used by any Boulder local using modes of transportation other than their own. WalkBoulder is free and for residents who want a more walkable city. Unlike Google Maps, WalkBoulder is interactive and tailored specifically toward Boulder residents, with reviews and suggestions from verified locals.</p>
-
-    <input type="text" placeholder="Find Trails" class="search-bar">
-
-    <hr>
-
-
-    <div class="trail">
-      <div class="trail-info">
-        <h2></h2>
-        <p></p>
+  <!-- Hero Section with Background Image -->
+  <div class="hero-section" style="
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&q=80&w=2070'); background-size: cover; background-position: center; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 1rem; margin-top: -56px; padding-top: 56px;">
+    <h1 style="color: white; font-size: 4rem; font-weight: bold; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">Walk Boulder</h1>
+    <div style="width: 100%; max-width: 600px; margin-bottom: 2rem; position: relative;">
+      <div style="position: relative; display: flex; align-items: center;">
+        <svg style="position: absolute; left: 1.5rem; width: 20px; height: 20px; color: #666;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" placeholder="Search by city, park, or trail name" style="width: 100%; padding: 1rem 1.5rem 1rem 3.5rem; font-size: 1.125rem; border: none; border-radius: 9999px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
       </div>
-      <div class="trail-image">[Image Placeholder]</div>
     </div>
-    <hr>
-
+    <a href="maps" style="color: white; text-decoration: none; font-weight: 500; transition: opacity 0.2s;">Explore nearby trails</a>
   </div>
 
+  <!-- Popular Trails Section -->
+  <div style="padding: 4rem 0; background: white;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+      <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem; color: #333;">Explore Trails Near You</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+        <!-- Trail Card 1 -->
+        <div style="background: white; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;">
+          <div style="position: relative;">
+            <img src="https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 387w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 687w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 774w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 987w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1287w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1374w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=1587&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1587w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1887w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1974w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=2187&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2187w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=2487&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2487w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2574w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2787w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 3087w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=3174&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 3174w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 3387w, https://images.unsplash.com/photo-1697329118245-1b1b82bba96c?q=80&w=3648&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 3648w" alt="Boulder Creek Path" style="width: 100%; height: 200px; object-fit: cover;">
+            <button style="position: absolute; top: 1rem; right: 1rem; background: white; border: none; border-radius: 9999px; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+          </div>
+          <div style="padding: 1.25rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">Boulder Creek Path</h3>
+            <p style="color: #666; font-size: 0.875rem;">5.7 mi</p>
+          </div>
+        </div>
 
-</body>
-</html>
+        <!-- Trail Card 3 -->
+        <div style="background: white; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;">
+          <div style="position: relative;">
+            <img src="https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?auto=format&fit=crop&q=80&w=800" alt="Chautauqua Trail" style="width: 100%; height: 200px; object-fit: cover;">
+            <button style="position: absolute; top: 1rem; right: 1rem; background: white; border: none; border-radius: 9999px; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+          </div>
+          <div style="padding: 1.25rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">Chautauqua Trail</h3>
+            <p style="color: #666; font-size: 0.875rem;">2.8 mi</p>
+          </div>
+        </div>
+
+        <!-- Trail Card 4 -->
+        <div style="background: white; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;">
+          <div style="position: relative;">
+            <img src="https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 870w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1170w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1470w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1740w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 1770w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2070w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2340w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=2370&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2370w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2670w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2940w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 2970w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 3270w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 3540w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 3570w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=3870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 3870w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=4140&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 4140w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=4170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 4170w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=4470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 4470w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=4740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 4740w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=4770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 4770w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=5070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 5070w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=5340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 5340w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=5370&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 5370w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=5670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 5670w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=5940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 5940w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=5970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 5970w, https://images.unsplash.com/photo-1727543328422-6ceba651193e?q=80&w=6000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D 6000w" alt="Flagstaff Trail" style="width: 100%; height: 200px; object-fit: cover;">
+            <button style="position: absolute; top: 1rem; right: 1rem; background: white; border: none; border-radius: 9999px; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+          </div>
+          <div style="padding: 1.25rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">Flagstaff Trail</h3>
+            <p style="color: #666; font-size: 0.875rem;">4.1 mi</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
