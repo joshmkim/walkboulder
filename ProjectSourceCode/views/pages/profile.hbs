@@ -52,12 +52,19 @@
   padding: 1rem;
 }
 
-{{!-- .friend-avatar {
-  width: 32px;
-  height: 32px;
-  object-fit: cover;
-  border-radius: 50%;
-} --}}
+  .friend-avatar {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+.walks-box {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fefefe;
+  padding: 1rem;
+}
 
   .custom-btn {
     display: inline-block;
@@ -134,6 +141,21 @@
         {{/if}}
       </div>
 
+      <!-- Recent Walks -->
+      <div class="walks-box mt-4 text-start">
+        <h5 class="mb-3">Recent Walks</h5>
+        {{#if userData.recentWalks.length}}
+          <ul class="list-unstyled">
+            {{#each userData.recentWalks}}
+              <li class="mb-2">
+                <strong>{{this.date}}</strong> – walked with {{this.buddy}}
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p class="text-muted">No walks logged yet.</p>
+        {{/if}}
+      </div>
 
       {{!-- <!--Achievements-->
       <div class="container">

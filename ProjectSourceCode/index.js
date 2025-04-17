@@ -214,14 +214,28 @@ app.get('/profile', async (req, res) => {
     return res.redirect('/login');
   }
   try {
+    const userId = req.session.userId;
+
     // achievements
     const achievementQuery = `SELECT username FROM users`; // `SELECT achievement_url, achievement_url FROM achievements`
     const achievements = await db.any(achievementQuery);
     
     // friends
-    const friendQuery = `SELECT users.username FROM users WHERE users.user_id = ALL (SELECT friend_id FROM user_to_friend WHERE user_id = user_to_friend.username)`;
-    const friends = await db.any(friendQuery);
+    const friendQuery = `SELECT users.username 
+                         FROM users 
+                         WHERE users.user_id IN (SELECT friend_id FROM user_to_friend WHERE user_id = $1)`;         
+    const friends = await db.any(friendQuery, [userId]);
     
+    // recent walks
+    const recentWalksQuery = `SELECT history.date, history.buddy 
+                              FROM history INNER JOIN user_to_history 
+                              ON history.history_id = user_to_history.history_id 
+                              INNER JOIN users ON users.user_id = user_to_history.username 
+                              WHERE user_to_history.username = $1
+                              ORDER BY history.date DESC 
+                              LIMIT 3`;
+    const recentWalks = await db.any(recentWalksQuery, [userId]);
+
     // for debugging
     console.log(achievements);
     
@@ -231,6 +245,7 @@ app.get('/profile', async (req, res) => {
     avatar: `/avatar/${user.user_id}`,
     bio: user.bio || "This user hasn’t written a bio yet.",
     friends: friends,
+    recentWalks: recentWalks,
     achievements: achievements
   };
   res.render('pages/profile', { userData });
