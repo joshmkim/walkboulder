@@ -1,0 +1,22 @@
+Note: All tests will be conducted in the localhost:3000 environment established by the Docker containers.
+
+Test #1: Adding friends
+To test that a user can add a friend to their list of friends, we will test that the new friend is in the database within the users table.
+From there, the friend should be able to see that they have a new friend request on their profile page. Should this person choose to, they
+should be able to accept the friend request. To test this, we will check that both users’ respective user_to_friends tables have been 
+updated. Additionally, their profile page should reflect this update with details like an increased “friend count”.
+
+Test #2: Transfer walk data to a friend
+Test that after a walk the data can be transferred to a friend so they can add it under their own routes. Verify that the friend is in 
+our friends list and the route is in our walk list. When we share the route the friend should see an accept or reject the route. The walk 
+data if accepted should be duplicated into the friends walks database. Once in the database we test that the friend can  see the walk 
+data under their own routes.
+
+Test #3: Writing a review of a trail
+For a user to write a review of a trail, they should start by visiting the page for that trail. From there, they should see an option to 
+write a review for the trail. On selecting that button, they should see a form for the review, containing selectors to rate their overall 
+satisfaction with the trail and its difficulty, as well as a text box for a detailed description. This will be tested by ensuring that 
+the HTML form appears when the user selects the “Add Review” button. Once the user has filled out the form, they can select 
+“Submit Review”, which will then post the review to the website. This will include changing the average satisfaction and difficulty 
+averages based on the new data, updating the number of reviews, and adding the review description to the reviews page for that route. 
+To test this, we will ensure that the trails_to_reviews, trails_to_difficulty, and trails_to_ratings tables are updated correctly.
