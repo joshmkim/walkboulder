@@ -21,7 +21,35 @@ const hbs = handlebars.create({
   partialsDir: __dirname + '/views/partials',
 });
 
-app.use(express.static(path.join(__dirname, '/walkboulder/ProjectSourceCode/views/styles')));
+
+
+
+app.get('/api/trails', async (req, res) => {
+  try {
+    console.log('Attempting to fetch trails...'); // Debug log
+    const trails = await db.any('SELECT * FROM trails');
+    console.log('Trails found:', trails); // Debug log
+    
+    if (!trails || trails.length === 0) {
+      console.warn('No trails found in database'); // Debug log
+    }
+    
+    res.json(trails);
+  } catch (err) {
+    console.error('Database error:', err);
+    res.status(500).json({ 
+      error: 'Database error',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
+
+
+
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/styles', express.static(path.join(__dirname, 'views/styles')));
 
 const dbConfig = {
   host: 'db',

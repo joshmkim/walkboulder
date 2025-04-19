@@ -172,57 +172,61 @@
     </div>
 
     <!-- JavaScript for scroll effect and logout confirmation -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const navbar = document.querySelector('.navbar');
-            
-            // Set initial state
-            if (window.scrollY === 0) {
-                navbar.classList.add('navbar-transparent');
-                navbar.classList.remove('navbar-solid');
-            } else {
-                navbar.classList.add('navbar-solid');
-                navbar.classList.remove('navbar-transparent');
-            }
-            
-            // Change state on scroll
-            window.addEventListener('scroll', function() {
-                if (window.scrollY === 0) {
-                    navbar.classList.add('navbar-transparent');
-                    navbar.classList.remove('navbar-solid');
-                } else {
-                    navbar.classList.add('navbar-solid');
-                    navbar.classList.remove('navbar-transparent');
-                }
-            });
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.querySelector('.navbar');
+    const solidRoutes = ['/maps', '/profile', '/settings', '/login', '/register'];
+    const currentPath = window.location.pathname;
 
-            // Logout confirmation functionality
-            const logoutLink = document.querySelector('.logout-link');
-            const logoutModal = document.getElementById('logoutModal');
-            const confirmLogout = document.getElementById('confirmLogout');
-            const cancelLogout = document.getElementById('cancelLogout');
+    if (solidRoutes.includes(currentPath)) {
+      navbar.classList.add('navbar-solid');
+      navbar.classList.remove('navbar-transparent');
+    } else {
+      if (window.scrollY === 0) {
+        navbar.classList.add('navbar-transparent');
+        navbar.classList.remove('navbar-solid');
+      } else {
+        navbar.classList.add('navbar-solid');
+        navbar.classList.remove('navbar-transparent');
+      }
 
-            logoutLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                logoutModal.style.display = 'flex';
-            });
+      window.addEventListener('scroll', function () {
+        if (window.scrollY === 0) {
+          navbar.classList.add('navbar-transparent');
+          navbar.classList.remove('navbar-solid');
+        } else {
+          navbar.classList.add('navbar-solid');
+          navbar.classList.remove('navbar-transparent');
+        }
+      });
+    }
 
-            confirmLogout.addEventListener('click', function() {
-                // Perform logout action (redirect to logout route)
-                window.location.href = '/logout';
-            });
+    // Logout modal
+    const logoutLink = document.querySelector('.logout-link');
+    const logoutModal = document.getElementById('logoutModal');
+    const confirmLogout = document.getElementById('confirmLogout');
+    const cancelLogout = document.getElementById('cancelLogout');
 
-            cancelLogout.addEventListener('click', function() {
-                logoutModal.style.display = 'none';
-            });
+    logoutLink?.addEventListener('click', function (e) {
+      e.preventDefault();
+      logoutModal.style.display = 'flex';
+    });
 
-            // Close modal when clicking outside the content
-            logoutModal.addEventListener('click', function(e) {
-                if (e.target === logoutModal) {
-                    logoutModal.style.display = 'none';
-                }
-            });
-        });
-    </script>
+    confirmLogout?.addEventListener('click', function () {
+      window.location.href = '/logout';
+    });
+
+    cancelLogout?.addEventListener('click', function () {
+      logoutModal.style.display = 'none';
+    });
+
+    logoutModal?.addEventListener('click', function (e) {
+      if (e.target === logoutModal) {
+        logoutModal.style.display = 'none';
+      }
+    });
+  });
+</script>
+
 </body>
 </html>

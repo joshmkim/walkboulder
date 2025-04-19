@@ -8,10 +8,9 @@
 </head>
 <body>
   <div class="min-h-screen">
-    <!-- Hero Section with Background Image -->
-    <div class="hero-section" style="
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&q=80&w=2070');
-background-size: cover; background-position: center; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 1rem; margin-top: -56px; padding-top: 56px;">
+    <!-- Hero Section -->
+    <div class="hero-section" style="background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&q=80&w=2070');
+      background-size: cover; background-position: center; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 1rem; margin-top: -56px; padding-top: 56px;">
       <h1 style="color: white; font-size: 4rem; font-weight: bold; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">Walk Boulder</h1>
       <div style="width: 100%; max-width: 600px; margin-bottom: 2rem; position: relative;">
         <div style="position: relative; display: flex; align-items: center;">
@@ -29,27 +28,113 @@ background-size: cover; background-position: center; min-height: 100vh; display:
     <div style="padding: 4rem 0; background: white;">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
         <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem; color: #333;">Explore Trails Near You</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
-          {{#each trails}}
-          <div style="background: white; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;">
-            <div style="position: relative;">
-              <img src="{{image_url}}" alt="{{name}}" style="width: 100%; height: 200px; object-fit: cover;">
-              <button style="position: absolute; top: 1rem; right: 1rem; background: white; border: none; border-radius: 9999px; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                </svg>
-              </button>
-            </div>
-            <div style="padding: 1.25rem;">
-              <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">{{name}}</h3>
-              <p style="color: #666; font-size: 0.875rem;">{{distance}} mi • {{difficulty}}</p>
-              <p style="color: #666; font-size: 0.875rem;">{{location}}</p>
-            </div>
-          </div>
-          {{/each}}
-        </div>
+        <div id="trails-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;"></div>
       </div>
     </div>
   </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    let trails = [];
+
+    try {
+      const response = await fetch('/api/trails');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      trails = await response.json();
+
+      const container = document.getElementById('trails-container');
+      if (!trails || trails.length === 0) {
+        container.innerHTML = '<p>No trails found. Check back later!</p>';
+        return;
+      }
+
+      container.innerHTML = trails.map(trail => `
+        <div class="trail-card" style="background: white; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;">
+          <div style="position: relative;">
+            <img src="${trail.image_url}" alt="${trail.name}" style="width: 100%; height: 200px; object-fit: cover;">
+            <button style="position: absolute; top: 1rem; right: 1rem; background: white; border: none; border-radius: 9999px; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+              ❤️
+            </button>
+          </div>
+          <div style="padding: 1.25rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">${trail.name}</h3>
+            <p style="color: #666; font-size: 0.875rem;">${trail.distance} mi • ${trail.difficulty}</p>
+            <p style="color: #666; font-size: 0.875rem;">${trail.location}</p>
+          </div>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error("Error loading trails:", error);
+      document.getElementById('trails-container').innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+          <p style="color: #dc2626;">Failed to load trails. Please try again later.</p>
+          <p>Error: ${error.message}</p>
+        </div>
+      `;
+    }
+
+    const input = document.querySelector('input[type="text"]');
+    const wrapper = input.parentElement;
+
+    const dropdown = document.createElement('ul');
+    dropdown.style.position = 'absolute';
+    dropdown.style.top = '100%';
+    dropdown.style.left = '0';
+    dropdown.style.right = '0';
+    dropdown.style.zIndex = '10';
+    dropdown.style.background = 'white';
+    dropdown.style.borderRadius = '0.5rem';
+    dropdown.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    dropdown.style.overflow = 'hidden';
+    dropdown.style.marginTop = '0.25rem';
+    dropdown.style.listStyle = 'none';
+    dropdown.style.padding = '0';
+    dropdown.style.display = 'none';
+
+    wrapper.appendChild(dropdown);
+
+    input.addEventListener('input', () => {
+      const query = input.value.toLowerCase().trim();
+      dropdown.innerHTML = '';
+
+      if (!query) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      const matches = trails.filter(t =>
+        t.name.toLowerCase().includes(query) ||
+        t.location.toLowerCase().includes(query)
+      );
+
+      if (matches.length === 0) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      matches.forEach(trail => {
+        const item = document.createElement('li');
+        item.textContent = `${trail.name} (${trail.location})`;
+        item.style.padding = '0.75rem 1rem';
+        item.style.cursor = 'pointer';
+        item.style.borderBottom = '1px solid #eee';
+        item.addEventListener('click', () => {
+          input.value = trail.name;
+          dropdown.style.display = 'none';
+        });
+        dropdown.appendChild(item);
+      });
+
+      dropdown.style.display = 'block';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!wrapper.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+  });
+</script>
+
 </body>
 </html>
