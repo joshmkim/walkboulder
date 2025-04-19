@@ -64,6 +64,53 @@
         body {
             padding-top: 56px;
         }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .confirm-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .cancel-button {
+            background-color: #6c757d;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -97,7 +144,7 @@
                             <a class="nav-link fw-medium" href="/settings">Settings</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-medium" href="/logout">Logout</a>
+                            <a class="nav-link fw-medium logout-link" href="#">Logout</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link login-button" href="/login">Login</a>
@@ -108,36 +155,78 @@
         </nav>
     </header>
 
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-content">
+            <h3>Are you sure you want to logout?</h3>
+            <div class="modal-buttons">
+                <button class="modal-button confirm-button" id="confirmLogout">Yes, Logout</button>
+                <button class="modal-button cancel-button" id="cancelLogout">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Your page content here -->
     <div class="container">
         <!-- Content goes here -->
     </div>
 
-    <!-- JavaScript for scroll effect -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const navbar = document.querySelector('.navbar');
-            
-            // Set initial state
-            if (window.scrollY === 0) {
-                navbar.classList.add('navbar-transparent');
-                navbar.classList.remove('navbar-solid');
-            } else {
-                navbar.classList.add('navbar-solid');
-                navbar.classList.remove('navbar-transparent');
-            }
-            
-            // Change state on scroll
-            window.addEventListener('scroll', function() {
-                if (window.scrollY === 0) {
-                    navbar.classList.add('navbar-transparent');
-                    navbar.classList.remove('navbar-solid');
-                } else {
-                    navbar.classList.add('navbar-solid');
-                    navbar.classList.remove('navbar-transparent');
-                }
-            });
-        });
-    </script>
+    <!-- JavaScript for scroll effect and logout confirmation -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.querySelector('.navbar');
+    const solidRoutes = ['/maps', '/profile', '/settings', '/login', '/register'];
+    const currentPath = window.location.pathname;
+
+    if (solidRoutes.includes(currentPath)) {
+      navbar.classList.add('navbar-solid');
+      navbar.classList.remove('navbar-transparent');
+    } else {
+      if (window.scrollY === 0) {
+        navbar.classList.add('navbar-transparent');
+        navbar.classList.remove('navbar-solid');
+      } else {
+        navbar.classList.add('navbar-solid');
+        navbar.classList.remove('navbar-transparent');
+      }
+
+      window.addEventListener('scroll', function () {
+        if (window.scrollY === 0) {
+          navbar.classList.add('navbar-transparent');
+          navbar.classList.remove('navbar-solid');
+        } else {
+          navbar.classList.add('navbar-solid');
+          navbar.classList.remove('navbar-transparent');
+        }
+      });
+    }
+
+    // Logout modal
+    const logoutLink = document.querySelector('.logout-link');
+    const logoutModal = document.getElementById('logoutModal');
+    const confirmLogout = document.getElementById('confirmLogout');
+    const cancelLogout = document.getElementById('cancelLogout');
+
+    logoutLink?.addEventListener('click', function (e) {
+      e.preventDefault();
+      logoutModal.style.display = 'flex';
+    });
+
+    confirmLogout?.addEventListener('click', function () {
+      window.location.href = '/logout';
+    });
+
+    cancelLogout?.addEventListener('click', function () {
+      logoutModal.style.display = 'none';
+    });
+
+    logoutModal?.addEventListener('click', function (e) {
+      if (e.target === logoutModal) {
+        logoutModal.style.display = 'none';
+      }
+    });
+  });
+</script>
+
 </body>
 </html>
