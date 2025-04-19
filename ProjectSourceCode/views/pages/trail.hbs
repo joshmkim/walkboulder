@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{trail.name}} - Walk Boulder</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .trail-header {
+      position: relative;
+      height: 50vh;
+      background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{trail.image_url}}');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: flex-end;
+      padding: 2rem;
+      color: white;
+    }
+    
+    .trail-content {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 20px;
+    }
+    
+    .trail-stats {
+      display: flex;
+      gap: 2rem;
+      margin: 1rem 0;
+    }
+    
+    .stat-item {
+      background: #f5f5f5;
+      padding: 1rem;
+      border-radius: 8px;
+      min-width: 100px;
+      text-align: center;
+    }
+    
+    .reviews-section {
+      margin-top: 3rem;
+    }
+    
+    .review-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen">
+    <!-- Trail Header with Image -->
+    <div class="trail-header">
+      <div>
+        <h1 style="font-size: 3rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">{{trail.name}}</h1>
+        <p style="font-size: 1.25rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">{{trail.location}}</p>
+      </div>
+    </div>
+
+    <!-- Trail Content -->
+    <div class="trail-content">
+      <div class="trail-stats">
+        <div class="stat-item">
+          <div style="font-size: 0.875rem; color: #666;">Distance</div>
+          <div style="font-weight: bold; font-size: 1.25rem;">{{trail.distance}} mi</div>
+        </div>
+        <div class="stat-item">
+          <div style="font-size: 0.875rem; color: #666;">Difficulty</div>
+          <div style="font-weight: bold; font-size: 1.25rem;">{{trail.difficulty}}</div>
+        </div>
+        <div class="stat-item">
+          <div style="font-size: 0.875rem; color: #666;">Rating</div>
+          <div style="font-weight: bold; font-size: 1.25rem;">{{trail.average_rating}}/5</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">About This Trail</h2>
+        <p style="line-height: 1.6;">{{trail.discription}}</p>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="reviews-section">
+        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Trail Reviews</h2>
+        {{#if trail.reviews}}
+          {{#each trail.reviews}}
+            <div class="review-card">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="font-weight: bold;">{{this.username}}</span>
+                <span>Rating: {{this.rating}}/5</span>
+              </div>
+              <p>{{this.review}}</p>
+              {{#if this.images}}
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                  {{#each this.images}}
+                    <img src="{{this.image_url}}" alt="Review photo" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;">
+                  {{/each}}
+                </div>
+              {{/if}}
+            </div>
+          {{/each}}
+        {{else}}
+          <p>No reviews yet. Be the first to review!</p>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
