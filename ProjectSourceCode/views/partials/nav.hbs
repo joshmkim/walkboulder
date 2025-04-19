@@ -166,67 +166,62 @@
         </div>
     </div>
 
-    <!-- Your page content here -->
-    <div class="container">
-        <!-- Content goes here -->
-    </div>
-
     <!-- JavaScript for scroll effect and logout confirmation -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const navbar = document.querySelector('.navbar');
-    const solidRoutes = ['/maps', '/profile', '/settings', '/login', '/register'];
-    const currentPath = window.location.pathname;
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const navbar = document.querySelector('.navbar');
+        const solidRoutes = ['/maps', '/profile', '/settings', '/login', '/register', '/trail'];
+        const currentPath = window.location.pathname;
 
-    if (solidRoutes.includes(currentPath)) {
-      navbar.classList.add('navbar-solid');
-      navbar.classList.remove('navbar-transparent');
-    } else {
-      if (window.scrollY === 0) {
-        navbar.classList.add('navbar-transparent');
-        navbar.classList.remove('navbar-solid');
-      } else {
-        navbar.classList.add('navbar-solid');
-        navbar.classList.remove('navbar-transparent');
-      }
-
-      window.addEventListener('scroll', function () {
-        if (window.scrollY === 0) {
-          navbar.classList.add('navbar-transparent');
-          navbar.classList.remove('navbar-solid');
-        } else {
+        // Check if current path starts with any solid route (including trail pages)
+        if (solidRoutes.some(route => currentPath.startsWith(route))) {
           navbar.classList.add('navbar-solid');
           navbar.classList.remove('navbar-transparent');
+        } else {
+          if (window.scrollY === 0) {
+            navbar.classList.add('navbar-transparent');
+            navbar.classList.remove('navbar-solid');
+          } else {
+            navbar.classList.add('navbar-solid');
+            navbar.classList.remove('navbar-transparent');
+          }
+
+          window.addEventListener('scroll', function() {
+            if (window.scrollY === 0) {
+              navbar.classList.add('navbar-transparent');
+              navbar.classList.remove('navbar-solid');
+            } else {
+              navbar.classList.add('navbar-solid');
+              navbar.classList.remove('navbar-transparent');
+            }
+          });
         }
+
+        // Logout modal
+        const logoutLink = document.querySelector('.logout-link');
+        const logoutModal = document.getElementById('logoutModal');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const cancelLogout = document.getElementById('cancelLogout');
+
+        logoutLink?.addEventListener('click', function(e) {
+          e.preventDefault();
+          logoutModal.style.display = 'flex';
+        });
+
+        confirmLogout?.addEventListener('click', function() {
+          window.location.href = '/logout';
+        });
+
+        cancelLogout?.addEventListener('click', function() {
+          logoutModal.style.display = 'none';
+        });
+
+        logoutModal?.addEventListener('click', function(e) {
+          if (e.target === logoutModal) {
+            logoutModal.style.display = 'none';
+          }
+        });
       });
-    }
-
-    // Logout modal
-    const logoutLink = document.querySelector('.logout-link');
-    const logoutModal = document.getElementById('logoutModal');
-    const confirmLogout = document.getElementById('confirmLogout');
-    const cancelLogout = document.getElementById('cancelLogout');
-
-    logoutLink?.addEventListener('click', function (e) {
-      e.preventDefault();
-      logoutModal.style.display = 'flex';
-    });
-
-    confirmLogout?.addEventListener('click', function () {
-      window.location.href = '/logout';
-    });
-
-    cancelLogout?.addEventListener('click', function () {
-      logoutModal.style.display = 'none';
-    });
-
-    logoutModal?.addEventListener('click', function (e) {
-      if (e.target === logoutModal) {
-        logoutModal.style.display = 'none';
-      }
-    });
-  });
-</script>
-
+    </script>
 </body>
 </html>

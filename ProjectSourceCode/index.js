@@ -112,6 +112,41 @@ app.get('/maps', (req, res) => {
   res.render('pages/maps');
 });
 
+// Add this route to your index.js
+app.get('/trail/:id', async (req, res) => {
+  try {
+    const trailId = req.params.id;
+    
+    // Get trail details
+    const trail = await db.one('SELECT * FROM trails WHERE trail_id = $1', [trailId]);
+    
+    // Get reviews for this trail
+    const reviews = await db.any(`
+      SELECT r.* 
+      FROM reviews r
+      JOIN trails_to_reviews tr ON r.review_id = tr.review_id
+      WHERE tr.trail_id = $1
+    `, [trailId]);
+    
+    // Get images for each review
+    for (const review of reviews) {
+      review.images = await db.any(`
+        SELECT i.* 
+        FROM images i
+        JOIN reviews_to_images ri ON i.image_id = ri.image_id
+        WHERE ri.review_id = $1
+      `, [review.review_id]);
+    }
+    
+    trail.reviews = reviews;
+    
+    res.render('pages/trail', { trail });
+  } catch (err) {
+    console.error('Error fetching trail:', err);
+    res.status(404).render('pages/404', { message: 'Trail not found' });
+  }
+});
+
 // ---------- LOGIN/LOGOUT/REGISTER ----------------------------------------
 
 app.get('/register', (req, res) => {
