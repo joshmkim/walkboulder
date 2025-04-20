@@ -524,10 +524,92 @@
       .hide {
         display: none;
       }
+
+
+
+
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 500px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: black;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+}
+
+.form-group textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+
+
+
+
+
+
+
+
+
     </style>
   </head>
   <body>
     <!-- Defined commutes SVGs -->
+    <svg class="hide">
+  <defs>
+    <symbol id="commutes-save-icon">
+      <path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4zm2 16H5V5h11.17L19 7.83V19zm-7-7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zM6 6h9v4H6z"/>
+    </symbol>
+  </defs>
+</svg>
+
+
+
+
     <svg class="hide">
       <defs>
         <symbol id="commutes-initial-icon">
@@ -893,7 +975,7 @@ startInput: commutesEl.modal.querySelector('input[name="start-address"]'),
         configuration.defaultTravelModeEnum =
             parseTravelModeEnum(configuration.defaultTravelMode);
         setTravelModeLayer(configuration.defaultTravelModeEnum);
-        createMarker(origin);
+        //createMarker(origin);
       }
 
       /**
@@ -1342,6 +1424,10 @@ startAutocomplete.addListener('place_changed', () => {
           place_id: destinationToAdd.place_id,
           label: label || getNextMarkerLabel(),
           travelModeEnum: travelModeEnum,
+
+          startAddress: destinationModalEl.startInput.value || '',
+          destinationAddress: destinationModalEl.destinationInput.value || '',
+
           url: generateMapsUrl(destinationToAdd, travelModeEnum),
         };
       }
@@ -1718,16 +1804,17 @@ startAutocomplete.addListener('place_changed', () => {
         <div class="destination-controls">
           <a class="directions-button" href=${destination.url} target="_blank"
              aria-label="Link to directions in Google Maps">
-            <svg aria-label="Directions icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <use href="#commutes-directions-icon"/>
+            <svg aria-label="Delete route icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
             </svg>
           </a>
-          <button class="edit-button" aria-label="Edit Destination">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <use href="#commutes-edit-icon"/>
-            </svg>
-            Edit
-          </button>
+
+<button class="edit-button" aria-label="Save Trail" onclick="openSaveTrailModal('${destination.startAddress}', '${destination.destinationAddress}', '${destination.distance}')">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <use href="#commutes-save-icon"/>
+  </svg>
+  Save
+</button>
         </div>`;
     }
     </script>
@@ -1742,7 +1829,149 @@ startAutocomplete.addListener('place_changed', () => {
       function initMap() {
         new Commutes(CONFIGURATION);
       }
+
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFJWukbwIMrbF7mwJFtuY06XHvlvF95I4&callback=initMap&libraries=places,geometry&solution_channel=GMP_QB_commutes_v3_c" async defer></script>
+  
+  
+  
+  
+  
+<div id="trailModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeSaveTrailModal()">&times;</span>
+    <h2>Save Trail</h2>
+    <form id="trailForm">
+      <div class="form-group">
+        <label for="trailName">Trail Name</label>
+        <input type="text" id="trailName" name="trailName" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="startLocation">Start Location</label>
+        <input type="text" id="startLocation" name="startLocation" readonly class="read-only-field">
+      </div>
+      
+      <div class="form-group">
+        <label for="endLocation">End Location</label>
+        <input type="text" id="endLocation" name="endLocation" readonly class="read-only-field">
+      </div>
+      
+      <div class="form-group">
+        <label for="trailDistance">Distance (miles)</label>
+        <input type="number" id="trailDistance" name="trailDistance" step="0.1" min="0" readonly class="read-only-field">
+      </div>
+      
+      <div class="form-group">
+        <label for="trailRating">Rating (0-5)</label>
+        <input type="number" id="trailRating" name="trailRating" step="0.1" min="0" max="5">
+      </div>
+      
+      <button type="submit" class="save-button">
+        Save Trail
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+
+// Save Trail Modal Functions
+function openSaveTrailModal(start, end, distance) {
+  const modal = document.getElementById('trailModal');
+  
+  // Set the values
+  document.getElementById('trailName').value = '';
+  document.getElementById('startLocation').value = start || '';
+  document.getElementById('endLocation').value = end || '';
+  document.getElementById('trailDistance').value = parseFloat(distance) || '';
+  
+  // Clear rating
+  document.getElementById('trailRating').value = '';
+  
+  modal.style.display = 'block';
+  
+  // Prevent scrolling when modal is open
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSaveTrailModal() {
+  const modal = document.getElementById('trailModal');
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+  const modal = document.getElementById('trailModal');
+  if (event.target == modal) {
+    closeSaveTrailModal();
+  }
+}
+
+// submission handler
+document.getElementById('trailForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Get form data
+  const formData = {
+    name: document.getElementById('trailName').value,
+    start_location: document.getElementById('startLocation').value,
+    end_location: document.getElementById('endLocation').value,
+    distance: parseFloat(document.getElementById('trailDistance').value),
+    average_rating: parseFloat(document.getElementById('trailRating').value) || null
+  };
+  
+  // Send data to server
+  fetch('/api/trails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // Important for session cookies
+    body: JSON.stringify(formData)
+  })
+  .then(response => {
+    if (response.status === 401) {
+      // Handle unauthorized (not logged in)
+      throw new Error('Please log in to save trails');
+    }
+    if (!response.ok) {
+      return response.json().then(err => { throw new Error(err.error); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    alert('Trail saved successfully!');
+    closeSaveTrailModal();
+    // Optional: refresh the trails list if you have one
+    if (window.refreshTrailsList) {
+      window.refreshTrailsList();
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error saving trail: ' + error.message);
+  });
+});
+
+// Add this style for read-only fields
+const style = document.createElement('style');
+style.textContent = `
+  .read-only-field {
+    background-color: #f5f5f5;
+    color: #666;
+    cursor: not-allowed;
+    border-color: #ddd;
+  }
+`;
+document.head.appendChild(style);
+</script>
+  <script src="/js/main.js"></script>
+  
+  
+  
+  
+  
   </body>
 </html>
