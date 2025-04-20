@@ -1,4 +1,5 @@
--- Drop all tables first to avoid conflicts
+-- Drop all tables first to avoid conflicts (existing drops remain the same)
+DROP TABLE IF EXISTS user_saved_trails CASCADE;
 DROP TABLE IF EXISTS user_to_history CASCADE;
 DROP TABLE IF EXISTS user_to_achievements CASCADE;
 DROP TABLE IF EXISTS user_to_friend CASCADE;
@@ -34,6 +35,17 @@ CREATE TABLE users (
     avatar BYTEA
 );
 
+-- Add saved trails table (NEW)
+CREATE TABLE user_saved_trails (
+    user_id INT NOT NULL,
+    trail_id INT NOT NULL,
+    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
+    FOREIGN KEY (trail_id) REFERENCES trails (trail_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, trail_id)
+);
+
+-- Rest of your existing table creations remain the same
 CREATE TABLE achievements (
     achievements_id SERIAL PRIMARY KEY,
     achievements_url VARCHAR(300) NOT NULL,
@@ -152,6 +164,13 @@ INSERT INTO users (username, password, total_distance, about) VALUES
 ('mountain_mike', 'climbhigh22', 56.7, 'Ultra-runner and trail enthusiast'),
 ('nature_nate', 'leafytrails', 12.3, 'Casual hiker who loves photography');
 
+-- Add sample saved trails (NEW)
+INSERT INTO user_saved_trails (user_id, trail_id) VALUES
+(1, 2),  -- hiker_jane saved Royal Arch Trail
+(1, 5),  -- hiker_jane saved Boulder Creek Path
+(2, 4),  -- mountain_mike saved Bear Peak
+(3, 1);  -- nature_nate saved Chautauqua Trail
+
 -- Insert sample reviews
 INSERT INTO reviews (username, review, rating) VALUES
 ('hiker_jane', 'Absolutely loved the view from Royal Arch!', 5),
@@ -185,7 +204,6 @@ INSERT INTO history (start_location, end_location, buddy, date) VALUES
 INSERT INTO user_to_friend (username, friend_id) VALUES
 (1, 2),  -- hiker_jane friends with mountain_mike
 (1, 3);  -- hiker_jane friends with nature_nate
-
 
 -- Add two more sample trails (append to your existing INSERT statement)
 INSERT INTO trails (name, location, distance, difficulty, discription, average_rating, image_url) VALUES
