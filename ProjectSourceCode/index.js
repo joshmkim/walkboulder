@@ -1,5 +1,4 @@
 // ---------------- dependencies -----------------------------------------------------------
-
 const express = require('express');
 const app = express();
 const handlebars = require('express-handlebars');
@@ -14,39 +13,11 @@ const multer = require('multer');
 const FileType = require('file-type');
 
 // ------------- connecting to DB and adding handlebars -------------------------------
-
 const hbs = handlebars.create({
   extname: 'hbs',
   layoutsDir: __dirname + '/views/layouts',
   partialsDir: __dirname + '/views/partials',
 });
-
-
-
-
-app.get('/api/trails', async (req, res) => {
-  try {
-    console.log('Attempting to fetch trails...'); // Debug log
-    const trails = await db.any('SELECT * FROM trails');
-    console.log('Trails found:', trails); // Debug log
-    
-    if (!trails || trails.length === 0) {
-      console.warn('No trails found in database'); // Debug log
-    }
-    
-    res.json(trails);
-  } catch (err) {
-    console.error('Database error:', err);
-    res.status(500).json({ 
-      error: 'Database error',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
-  }
-});
-
-
-
-
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/styles', express.static(path.join(__dirname, 'views/styles')));
@@ -71,7 +42,6 @@ db.connect()
   });
 
 // ------- App Settings --------
-
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
@@ -112,13 +82,102 @@ app.get('/maps', (req, res) => {
   res.render('pages/maps');
 });
 
-// Add this route to your index.js
+// API endpoint to check authentication status
+app.get('/api/check-auth', (req, res) => {
+  res.json({ isAuthenticated: !!req.session.user });
+});
+
+// API endpoint to toggle trail saving
+app.post('/api/toggle-save-trail', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { trailId } = req.body;
+    const userId = req.session.user.user_id;
+
+    // Check if trail is already saved
+    const isSaved = await db.oneOrNone(
+      'SELECT 1 FROM user_saved_trails WHERE user_id = $1 AND trail_id = $2',
+      [userId, trailId]
+    );
+
+    if (isSaved) {
+      // If already saved, unsave it
+      await db.none(
+        'DELETE FROM user_saved_trails WHERE user_id = $1 AND trail_id = $2',
+        [userId, trailId]
+      );
+      return res.json({ isSaved: false });
+    } else {
+      // If not saved, save it
+      await db.none(
+        'INSERT INTO user_saved_trails (user_id, trail_id) VALUES ($1, $2)',
+        [userId, trailId]
+      );
+      return res.json({ isSaved: true });
+    }
+  } catch (error) {
+    console.error('Error toggling saved trail:', error);
+    res.status(500).json({ error: 'Failed to toggle saved trail' });
+  }
+});
+
+// Get all trails with saved status for authenticated users
+app.get('/api/trails', async (req, res) => {
+  try {
+    let trails = await db.any('SELECT * FROM trails');
+    
+    // If user is logged in, check which trails they've saved
+    if (req.session.user) {
+      const userId = req.session.user.user_id;
+      const savedTrails = await db.any(
+        'SELECT trail_id FROM user_saved_trails WHERE user_id = $1',
+        [userId]
+      );
+      
+      const savedTrailIds = savedTrails.map(t => t.trail_id);
+      trails = trails.map(trail => ({
+        ...trail,
+        is_saved: savedTrailIds.includes(trail.trail_id)
+      }));
+    } else {
+      // For non-logged in users, set is_saved to false for all trails
+      trails = trails.map(trail => ({
+        ...trail,
+        is_saved: false
+      }));
+    }
+    
+    res.json(trails);
+  } catch (err) {
+    console.error('Database error:', err);
+    res.status(500).json({ 
+      error: 'Database error',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
+// Trail details page
 app.get('/trail/:id', async (req, res) => {
   try {
     const trailId = req.params.id;
     
     // Get trail details
     const trail = await db.one('SELECT * FROM trails WHERE trail_id = $1', [trailId]);
+    
+    // Check if user has saved this trail
+    if (req.session.user) {
+      const isSaved = await db.oneOrNone(
+        'SELECT 1 FROM user_saved_trails WHERE user_id = $1 AND trail_id = $2',
+        [req.session.user.user_id, trailId]
+      );
+      trail.is_saved = !!isSaved;
+    } else {
+      trail.is_saved = false;
+    }
     
     // Get reviews for this trail
     const reviews = await db.any(`
@@ -148,7 +207,6 @@ app.get('/trail/:id', async (req, res) => {
 });
 
 // ---------- LOGIN/LOGOUT/REGISTER ----------------------------------------
-
 app.get('/register', (req, res) => {
   res.render('pages/register');
 });
@@ -228,17 +286,36 @@ app.get('/logout', (req, res) => {
 app.use(auth);
 
 // --------------------------------------- PROFILE ENDPOINTS ------------------------------------------------------------------
-
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.get('/profile', (req, res) => {
-  const user = req.session.user;
-  const userData = {
-    name: user.username,
-    avatar: `/avatar/${user.user_id}`,
-    bio: user.bio || "This user hasn’t written a bio yet."
-  };
-  res.render('pages/profile', { userData });
+app.get('/profile', async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userData = {
+      name: user.username,
+      avatar: `/avatar/${user.user_id}`,
+      bio: user.bio || "This user hasn't written a bio yet."
+    };
+
+    // Get saved trails for the user
+    const savedTrails = await db.any(`
+      SELECT t.* 
+      FROM trails t
+      JOIN user_saved_trails ust ON t.trail_id = ust.trail_id
+      WHERE ust.user_id = $1
+    `, [user.user_id]);
+
+    res.render('pages/profile', { 
+      userData,
+      savedTrails: savedTrails || []
+    });
+  } catch (error) {
+    console.error('Error loading profile:', error);
+    res.status(500).render('pages/error', { 
+      message: 'Error loading profile',
+      error: true
+    });
+  }
 });
 
 app.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
@@ -270,13 +347,12 @@ app.get('/avatar/:userId', async (req, res) => {
 });
 
 // --------------------------------------- SETTINGS ENDPOINTS ------------------------------------------------------------------
-
 app.get('/settings', (req, res) => {
   const user = req.session.user;
   const userData = {
     username: user.username,
     avatar: `/avatar/${user.user_id}`,
-    bio: user.bio || "This user hasn’t written a bio yet.",
+    bio: user.bio || "This user hasn't written a bio yet.",
     password: user.password,
     email: user.email || "",
     firstname: user.firstname || "",
@@ -319,7 +395,7 @@ app.post('/settings', async (req, res) => {
       userData: {
         ...updatedUser,
         avatar: `/avatar/${updatedUser.user_id}`,
-        bio: updatedUser.bio || "This user hasn’t written a bio yet."
+        bio: updatedUser.bio || "This user hasn't written a bio yet."
       },
       message: 'Settings updated successfully!',
       error: false
@@ -335,7 +411,6 @@ app.post('/settings', async (req, res) => {
 });
 
 // ----------------------- starting the server -----------------------
-
 const server = app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
