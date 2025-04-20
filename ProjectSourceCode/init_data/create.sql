@@ -3,23 +3,20 @@ DROP TABLE IF EXISTS user_to_history CASCADE;
 DROP TABLE IF EXISTS user_to_achievements CASCADE;
 DROP TABLE IF EXISTS user_to_friend CASCADE;
 DROP TABLE IF EXISTS trails_to_user CASCADE;
-DROP TABLE IF EXISTS reviews_to_images CASCADE;
 DROP TABLE IF EXISTS trails_to_reviews CASCADE;
 DROP TABLE IF EXISTS history CASCADE;
 DROP TABLE IF EXISTS achievements CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS trails CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
-DROP TABLE IF EXISTS images CASCADE;
 
 -- Create tables (order matters for foreign keys)
 CREATE TABLE trails 
 (
     average_rating DECIMAL,
-    difficulty VARCHAR(100) CONSTRAINT limited_values CHECK (difficulty in ('easy', 'moderate', 'difficult', 'very_difficult')),
-    discription VARCHAR(200) NOT NULL,
     distance DECIMAL,
-    location VARCHAR(100) NOT NULL,
+    start_location VARCHAR(100) NOT NULL,
+    end_location VARCHAR(100) NOT NULL,
     name VARCHAR(100) NOT NULL,
     trail_id SERIAL PRIMARY KEY
 );
@@ -41,7 +38,6 @@ CREATE TABLE achievements (
 
 CREATE TABLE history (
     history_id SERIAL PRIMARY KEY,
-    location VARCHAR(100) NOT NULL,
     start_location VARCHAR(100) NOT NULL,
     end_location VARCHAR(100) NOT NULL,
     buddy VARCHAR(100) NOT NULL,
@@ -56,27 +52,12 @@ CREATE TABLE IF NOT EXISTS reviews
   rating DECIMAL NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS images 
-(
-  image_id SERIAL PRIMARY KEY NOT NULL,
-  image_url VARCHAR(300) NOT NULL,
-  image_caption VARCHAR(200)
-);
-
 CREATE TABLE trails_to_reviews 
 (
   trail_id INT NOT NULL,
   review_id INT NOT NULL,
   FOREIGN KEY (trail_id) REFERENCES trails (trail_id) ON DELETE CASCADE,
   FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
-);
-
-CREATE TABLE reviews_to_images (
-    image_id INT NOT NULL,
-    review_id INT NOT NULL,
-    FOREIGN KEY (image_id) REFERENCES images (image_id) ON DELETE CASCADE,
-    FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE,
-    PRIMARY KEY (image_id, review_id)
 );
 
 CREATE TABLE trails_to_user (
@@ -138,4 +119,43 @@ INSERT INTO achievements (achievements_id, achievements_url, achievements_captio
     VALUES
     (1, '', 'Record your first walk'),
     (2, '', 'Add your first friend'),
-    (3, '', 'Leave your first review'); 
+    (3, '', 'Leave your first review');
+
+-- Preset Database Values:
+INSERT INTO users (user_id, username, password) 
+    VALUES
+    (1, 'Diana', 'passwordtest'),
+    (2, 'Helios', 'passwordtest2'),
+    (3, 'Minerva', 'passwordtest3'),
+    (4, 'Cerces', 'passwordtest4');
+
+INSERT INTO history (history_id, start_location, end_location, buddy, date)
+    VALUES
+    (1, '30th Street', 'Pearl Street', 'No Buddy', '2024-08-25'),
+    (2, 'Laguna Pl', 'Williams Village', 'Helios', '2025-01-13'),
+    (3, 'Inca Pkwy', 'Broadway', 'Minerva', '2025-02-28'),
+    (4, 'Parker', 'Havana', 'Ceres', '2025-03-09');
+
+INSERT INTO user_to_history (username,  history_id)
+    VALUES
+    (1, 1),
+    (3, 2),
+    (4, 3),
+    (1, 4);
+
+INSERT INTO user_to_friend (username, friend_id) -- only need to insert values one way, the trigger will make it two-way
+    VALUES
+    (3, 2),
+    (1, 4),
+    (3, 4); 
+
+INSERT INTO user_to_achievements (username, achievements_id)
+    VALUES
+    (1, 1),
+    (1, 2),
+    (2, 1),
+    (2, 2),
+    (3, 1),
+    (3, 2),
+    (4, 1),
+    (4, 2);

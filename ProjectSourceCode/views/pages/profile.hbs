@@ -104,6 +104,9 @@
       <!-- User Name -->
       <h2>{{userData.name}}</h2>
 
+      <!--User's Id, so a friend can be added-->
+      <p class="text-muted small">User ID: {{userData.ID}}</p>
+
       <!-- User Bio -->
       {{#if userData.bio}}
         <p class="bio-text">{{userData.bio}}</p>
@@ -127,44 +130,36 @@
           <p class="text-muted">You don't have any friends added yet.</p>
         {{/if}}
 
-        <!-- Find Friends Button -->
-        <button class="custom-btn mt-3" data-bs-toggle="modal" data-bs-target="#findFriendsModal">
-          Find Friends
-        </button>
+        <!-- Label for search bar -->
+          <label for="friendSearchInput" class="form-label fw-bold mb-2">Add Friend</label>
+          <input
+            type="text"
+            id="friendSearchInput"
+            name="friendId"
+            class="form-control"
+            placeholder="Enter the user's ID"
+            required
+          >
 
-        <!-- Find Friends Modal -->
-        {{!-- <div class="modal fade" id="findFriendsModal" tabindex="-1" aria-labelledby="findFriendsModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-3">
-              <div class="modal-header">
-                <h5 class="modal-title" id="findFriendsModalLabel">Search Users</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
+          <!-- Feedback -->
+          <p id="searchFeedback" class="text-danger small"></p>
+          </div>
 
-              <div class="modal-body">
-                <input type="text" id="friendSearchInput" class="form-control mb-3" placeholder="Enter username">
-                <div id="searchResults"></div> <!-- Results will be populated here -->
+          <!-- Profile Modal -->
+          <div class="modal fade" id="userProfileModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content text-center p-4">
+                <img id="profileAvatar" class="avatar-preview mx-auto" src="" alt="Profile Picture">
+                <h4 id="profileName"></h4>
+                <p class="text-muted" id="profileIdText"></p>
+                <form action="/add-friend" method="POST" class="d-flex justify-content-between mt-4 px-3">
+                  <input type="hidden" name="friendId" id="hiddenFriendId" />
+                  <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-success">Add Friend</button>
+                </form>
               </div>
             </div>
           </div>
-        </div>         --}}
-        <div class="modal fade" id="findFriendsModal" tabindex="-1" aria-labelledby="findFriendsModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-3">
-              <div class="modal-header">
-                <h5 class="modal-title" id="findFriendsModalLabel">Search Users</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <form action="/add-friend" method="POST">
-                <div class="modal-body">
-                  <input type="text" name="search" class="form-control mb-3" placeholder="Enter username">
-                  <button type="submit" class="btn btn-primary">Add Friend</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Recent Walks -->
       <div class="walks-box mt-4 text-start">
@@ -203,5 +198,60 @@
       </div>
     </div>
   </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>  
+<script src="../../index.js"></script>
+
+<!-- Needs working on in order to function -->
+{{!-- <script>
+  const currentUserId = {{userData.user_id}};
+  const users = {{{json allUsers}}}; // [{ id: 1, name: 'Alice', avatar: 'url' }, ...]
+
+  const input = document.getElementById("searchUserId");
+  const feedback = document.getElementById("searchFeedback");
+  const modal = new bootstrap.Modal(document.getElementById("userProfileModal"));
+
+  const nameEl = document.getElementById("profileName");
+  const avatarEl = document.getElementById("profileAvatar");
+  const hiddenIdEl = document.getElementById("hiddenFriendId");
+  const profileIdText = document.getElementById("profileIdText");
+
+  input.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const enteredId = parseInt(input.value.trim());
+
+      // Validate input
+      if (isNaN(enteredId)) {
+        feedback.textContent = "Please enter a valid numeric ID.";
+        return;
+      }
+
+      if (enteredId === currentUserId) {
+        feedback.textContent = "You can't add yourself as a friend!";
+        return;
+      }
+
+      const match = users.find(u => u.id === enteredId);
+
+      if (!match) {
+        feedback.textContent = "No user found with that ID.";
+        return;
+      }
+
+      // Clear feedback
+      feedback.textContent = "";
+
+      // Fill modal content
+      nameEl.textContent = match.name;
+      avatarEl.src = match.avatar;
+      hiddenIdEl.value = match.id;
+      profileIdText.textContent = `ID: ${match.id}`;
+
+      modal.show();
+    }
+  });
+</script> --}}
+
 </body>
 </html>

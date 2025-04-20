@@ -96,7 +96,7 @@ app.get('/maps', (req, res) =>
 //register 
 
 app.get('/register', (req, res) => {
-  res.render('pages/register')
+  res.render('pages/register') 
 });
 
 app.post('/register', async (req, res) => {
@@ -130,6 +130,9 @@ app.post('/register', async (req, res) => {
       'INSERT INTO users (username, password) VALUES ($1, $2)',
       [username, hash]
     );
+    // Get the new user's ID
+    req.session.user = newUser;
+    return res.redirect('/');
 
     // 4. Auto-login after registration
     const newUser = await db.one(
@@ -235,6 +238,11 @@ app.get('/profile', async (req, res) => {
       [userId]
     );
 
+    // User's ID - for adding friends
+    const IDQuery = `SELECT users.user_id
+                     FROM users`;
+    const ID = await db.any(IDQuery, [userId]);
+
     // Collect earned achievements
     const achievements = [];
     if (firstWalk) achievements.push({ title: "Take your first walk" });
@@ -266,6 +274,7 @@ app.get('/profile', async (req, res) => {
     const userData = {
     name: user.username,
     avatar: `/avatar/${user.user_id}`,
+    ID: user.ID,
     bio: user.bio || "This user hasn’t written a bio yet.",
     friends: friends,
     recentWalks: recentWalks,
@@ -330,6 +339,43 @@ app.get('/avatar/:userId', async (req, res) => {
   }
 });
 
+// document.addEventListener("DOMContentLoaded", function () {
+//   const input = document.getElementById('friendSearchInput');
+//   const resultsContainer = document.getElementById('searchResults');
+
+//   if (!input || !resultsContainer) return;
+
+//   input.addEventListener('input', async function () {
+//     const query = input.value.trim();
+
+//     if (query.length < 2) {
+//       resultsContainer.innerHTML = '';
+//       return;
+//     }
+
+//     try {
+//       const res = await fetch(`/search-friends?q=${encodeURIComponent(query)}`);
+//       const data = await res.json();
+
+//       if (data.length === 0) {
+//         resultsContainer.innerHTML = '<p class="text-muted">No users found.</p>';
+//       } else {
+//         resultsContainer.innerHTML = data.map(user => `
+//           <div class="d-flex justify-content-between align-items-center mb-2">
+//             <span>${user.username}</span>
+//             <form method="POST" action="/add-friend">
+//               <input type="hidden" name="search" value="${user.username}">
+//               <button type="submit" class="btn btn-sm btn-success">Add</button>
+//             </form>
+//           </div>
+//         `).join('');
+//       }
+//     } catch (err) {
+//       resultsContainer.innerHTML = '<p class="text-danger">Error searching users.</p>';
+//     }
+//   });
+// });
+
 // Friend Search
 app.post('/add-friend', async (req, res) => {
   const currentUserId = req.session.userId;
@@ -373,6 +419,46 @@ app.post('/add-friend', async (req, res) => {
 
   res.redirect('/profile');
 });
+// // Friend search API
+// app.get('/search-friends', async (req, res) => {
+//   const search = req.query.q;
+//   const currentUserId = req.session.userId;
+
+//   if (!search) return res.json([]);
+
+//   try {
+//     const users = await db.any(
+//       `SELECT username FROM users 
+//        WHERE username ILIKE $1 AND user_id != $2 
+//        LIMIT 10`, 
+//       [`%${search}%`, currentUserId]
+//     );
+//     res.json(users);
+//   } catch (err) {
+//     console.error('Search error:', err);
+//     res.status(500).json([]);
+//   }
+// });
+
+// // In your route handler
+// router.get("/find-friends", async (req, res) => {
+//   const currentUser = req.session.user;
+
+//   const allUsers = await db.any('SELECT user_id AS id, username AS name, encode(avatar, \'base64\') AS avatar FROM users');
+
+//   // Convert avatars if needed
+//   const usersWithAvatars = allUsers.map(user => ({
+//     ...user,
+//     avatar: user.avatar 
+//       ? `data:image/png;base64,${user.avatar}` 
+//       : 'https://i.pravatar.cc/100?u=' + user.id
+//   }));
+
+//   res.render("find-friends", {
+//     userData: currentUser,
+//     allUsers: usersWithAvatars
+//   });
+// });
 
 
 // --------------------------------------- SETTINGS ENDPOINTS ------------------------------------------------------------------
