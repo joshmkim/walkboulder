@@ -164,6 +164,189 @@
       margin-bottom: 1.5rem;
     }
 
+    /* Saved Trails Section */
+    .saved-trails-section {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .saved-trails-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .saved-trail-card {
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+    
+    .saved-trail-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .saved-trail-img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+    
+    .saved-trail-info {
+      padding: 1rem;
+    }
+    
+    .saved-trail-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .saved-trail-meta {
+      color: #666;
+      font-size: 0.875rem;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 1rem;
+    }
+    
+    .no-saved-trails {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+
+    /* New Friend System Styles */
+    .friend-code {
+      color: #6b7280;
+      font-size: 1rem;
+      font-weight: 400;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .friend-section {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .friend-tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 1.5rem;
+    }
+    
+    .friend-tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      color: #6b7280;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .friend-tab.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+    
+    .friend-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .friend-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .friend-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .friend-name {
+      font-weight: 500;
+      color: #111827;
+    }
+    
+    .friend-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .friend-action-btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      border-radius: 0.25rem;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .accept-btn {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .reject-btn {
+      background-color: #ef4444;
+      color: white;
+    }
+    
+    .add-friend-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .friend-code-input {
+      flex-grow: 1;
+      padding: 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.25rem;
+    }
+    
+    .no-friends {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+    }
+    
+    .friend-count {
+      background-color: #e5e7eb;
+      color: #4b5563;
+      border-radius: 9999px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+
     @media (max-width: 640px) {
       .profile-card {
         margin: 2rem 1rem;
@@ -236,6 +419,7 @@
 
       <!-- User Name -->
       <h2>{{userData.name}}</h2>
+      <div class="friend-code">#{{userData.friend_code}}</div>
 
       <!-- User Bio -->
       {{#if userData.bio}}
@@ -249,10 +433,99 @@
         <a href="/settings" class="custom-btn primary">Edit Profile</a>
         <a href="/logout" class="custom-btn secondary">Logout</a>
       </div>
+      
+      <!-- Add Friend Form -->
+      <div class="add-friend-form-container" style="margin-top: 1.5rem;">
+        <h4 style="margin-bottom: 0.5rem;">Add Friend</h4>
+        <form class="add-friend-form" id="addFriendForm">
+          <input type="text" class="friend-code-input" placeholder="Enter friend code" required>
+          <button type="submit" class="custom-btn primary" style="padding: 0.5rem 1rem;">Send Request</button>
+        </form>
+      </div>
     </div>
   </div>
 
-  <!-- JavaScript for logout confirmation -->
+<!-- Friends Section -->
+<div class="friend-section">
+  <div class="friend-tabs">
+    <div class="friend-tab active" data-tab="friends">Friends <span class="friend-count">{{friends.length}}</span></div>
+    <div class="friend-tab" data-tab="requests">Requests <span class="friend-count">{{friendRequests.length}}</span></div>
+  </div>
+  
+  <!-- Friends Tab -->
+  <div class="friend-tab-content" id="friendsTab">
+    {{#if friends.length}}
+      <div class="friend-list">
+        {{#each friends}}
+          <div class="friend-card">
+            <img src="{{this.avatar}}" class="friend-avatar">
+            <div style="flex-grow: 1;">
+              <div class="friend-name">{{this.username}}</div>
+
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="no-friends">
+        <p>You don't have any friends yet.</p>
+      </div>
+    {{/if}}
+  </div>
+  
+  <!-- Requests Tab -->
+  <div class="friend-tab-content" id="requestsTab" style="display: none;">
+    {{#if friendRequests.length}}
+      <div class="friend-list">
+        {{#each friendRequests}}
+          <div class="friend-card">
+            <img src="{{this.sender_avatar}}" class="friend-avatar">
+            <div style="flex-grow: 1;">
+              <div class="friend-name">{{this.sender_username}}</div>
+
+              <div class="friend-actions">
+                <button class="friend-action-btn accept-btn" data-request-id="{{this.request_id}}">Accept</button>
+                <button class="friend-action-btn reject-btn" data-request-id="{{this.request_id}}">Reject</button>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="no-friends">
+        <p>You don't have any pending friend requests.</p>
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+  <!-- Saved Trails Section -->
+  <div class="saved-trails-section">
+    <h2 class="section-title">My Saved Trails</h2>
+    {{#if savedTrails.length}}
+      <div class="saved-trails-grid">
+        {{#each savedTrails}}
+          <div class="saved-trail-card">
+            <a href="/trail/{{this.trail_id}}">
+              <img src="{{this.image_url}}" alt="{{this.name}}" class="saved-trail-img">
+              <div class="saved-trail-info">
+                <h3 class="saved-trail-title">{{this.name}}</h3>
+                <p class="saved-trail-meta">{{this.distance}} mi • {{this.difficulty}}</p>
+                <p class="saved-trail-meta">{{this.location}}</p>
+              </div>
+            </a>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="no-saved-trails">
+        <p>You haven't saved any trails yet.</p>
+        <a href="/" class="custom-btn primary" style="margin-top: 1rem;">Explore Trails</a>
+      </div>
+    {{/if}}
+  </div>
+
+  <!-- JavaScript for logout confirmation and friend functionality -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Logout modal functionality
@@ -289,111 +562,85 @@
           logoutModal.style.display = 'none';
         }
       });
+
+      // Friend system functionality
+      // Tab switching
+      const tabs = document.querySelectorAll('.friend-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          tabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          document.querySelectorAll('.friend-tab-content').forEach(content => {
+            content.style.display = 'none';
+          });
+          
+          const tabId = this.getAttribute('data-tab') + 'Tab';
+          document.getElementById(tabId).style.display = 'block';
+        });
+      });
+      
+      // Add friend form submission
+      const addFriendForm = document.getElementById('addFriendForm');
+      if (addFriendForm) {
+        addFriendForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const friendCode = this.querySelector('.friend-code-input').value.trim();
+          
+          try {
+            const response = await fetch('/api/friends/request', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ friend_code: friendCode })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+              alert('Friend request sent successfully!');
+              window.location.reload();
+            } else {
+              alert(data.message || 'Failed to send friend request');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while sending friend request');
+          }
+        });
+      }
+      
+      // Handle friend request actions
+      document.querySelectorAll('.accept-btn, .reject-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          const requestId = this.getAttribute('data-request-id');
+          const action = this.classList.contains('accept-btn') ? 'accept' : 'reject';
+          
+          try {
+            const response = await fetch(`/api/friends/request/${requestId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ action })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+              alert(`Request ${action}ed successfully!`);
+              window.location.reload();
+            } else {
+              alert(data.message || `Failed to ${action} friend request`);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert(`An error occurred while ${action}ing friend request`);
+          }
+        });
+      });
     });
   </script>
-
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-  <!-- Keep all your existing head content -->
-  <!-- Add this new style for the saved trails section -->
-  <style>
-    .saved-trails-section {
-      background-color: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    
-    .saved-trails-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-    
-    .saved-trail-card {
-      background: white;
-      border-radius: 0.75rem;
-      overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
-    }
-    
-    .saved-trail-card:hover {
-      transform: translateY(-3px);
-    }
-    
-    .saved-trail-img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-    }
-    
-    .saved-trail-info {
-      padding: 1rem;
-    }
-    
-    .saved-trail-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #333;
-    }
-    
-    .saved-trail-meta {
-      color: #666;
-      font-size: 0.875rem;
-    }
-    
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 1rem;
-    }
-    
-    .no-saved-trails {
-      text-align: center;
-      padding: 2rem;
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-  <!-- Keep your existing navbar and profile card -->
-
-  <!-- Add this new section for saved trails -->
-  <div class="saved-trails-section">
-    <h2 class="section-title">My Saved Trails</h2>
-    {{#if savedTrails.length}}
-      <div class="saved-trails-grid">
-        {{#each savedTrails}}
-          <div class="saved-trail-card">
-            <a href="/trail/{{this.trail_id}}">
-              <img src="{{this.image_url}}" alt="{{this.name}}" class="saved-trail-img">
-              <div class="saved-trail-info">
-                <h3 class="saved-trail-title">{{this.name}}</h3>
-                <p class="saved-trail-meta">{{this.distance}} mi • {{this.difficulty}}</p>
-                <p class="saved-trail-meta">{{this.location}}</p>
-              </div>
-            </a>
-          </div>
-        {{/each}}
-      </div>
-    {{else}}
-      <div class="no-saved-trails">
-        <p>You haven't saved any trails yet.</p>
-        <a href="/" class="custom-btn primary" style="margin-top: 1rem;">Explore Trails</a>
-      </div>
-    {{/if}}
-  </div>
-
-  <!-- Keep your existing JavaScript -->
-</body>
-</html>
 </body>
 </html>
