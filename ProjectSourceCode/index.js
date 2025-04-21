@@ -57,6 +57,29 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'resources')));
 
+// Middleware to ensure friend codes exist for existing users
+app.use(async (req, res, next) => {
+  if (req.session.user && !req.session.user.friend_code) {
+    try {
+      // Generate a random 8-character friend code
+      const friendCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      await db.none(
+        'UPDATE users SET friend_code = $1 WHERE user_id = $2',
+        [friendCode, req.session.user.user_id]
+      );
+      // Refresh the session user
+      const updatedUser = await db.one(
+        'SELECT * FROM users WHERE user_id = $1',
+        [req.session.user.user_id]
+      );
+      req.session.user = updatedUser;
+    } catch (err) {
+      console.error('Error generating friend code:', err);
+    }
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
@@ -230,7 +253,13 @@ app.post('/register', async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, 12);
-    await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hash]);
+    // Generate a random 8-character friend code
+    const friendCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+    
+    await db.none(
+      'INSERT INTO users (username, password, friend_code) VALUES ($1, $2, $3)',
+      [username, hash, friendCode]
+    );
 
     const newUser = await db.one('SELECT * FROM users WHERE username = $1', [username]);
     req.session.user = newUser;
@@ -294,10 +323,11 @@ app.get('/profile', async (req, res) => {
     const userData = {
       name: user.username,
       avatar: `/avatar/${user.user_id}`,
-      bio: user.bio || "This user hasn't written a bio yet."
+      bio: user.bio || "This user hasn't written a bio yet.",
+      friend_code: user.friend_code
     };
 
-    // Get saved trails for the user
+    // Get saved trails
     const savedTrails = await db.any(`
       SELECT t.* 
       FROM trails t
@@ -305,9 +335,33 @@ app.get('/profile', async (req, res) => {
       WHERE ust.user_id = $1
     `, [user.user_id]);
 
+    // Get friends
+    const friends = await db.any(`
+      SELECT u.user_id, u.username, u.avatar, u.friend_code
+      FROM user_to_friend uf
+      JOIN users u ON uf.friend_id = u.user_id
+      WHERE uf.username = $1
+    `, [user.user_id]);
+    
+    // Get pending requests with sender info
+    const friendRequests = await db.any(`
+      SELECT 
+        fr.request_id, 
+        fr.created_at,
+        u.user_id as sender_id,
+        u.username as sender_username,
+        u.avatar as sender_avatar,
+        u.friend_code as sender_friend_code
+      FROM friend_requests fr
+      JOIN users u ON fr.sender_id = u.user_id
+      WHERE fr.receiver_id = $1 AND fr.status = 'pending'
+    `, [user.user_id]);
+
     res.render('pages/profile', { 
       userData,
-      savedTrails: savedTrails || []
+      savedTrails: savedTrails || [],
+      friends: friends || [],
+      friendRequests: friendRequests || []
     });
   } catch (error) {
     console.error('Error loading profile:', error);
@@ -315,6 +369,163 @@ app.get('/profile', async (req, res) => {
       message: 'Error loading profile',
       error: true
     });
+  }
+});
+
+// Friend system endpoints
+app.post('/api/friends/request', async (req, res) => {
+  try {
+    const { friend_code } = req.body;
+    const userId = req.session.user.user_id;
+    
+    // Find user with this friend code
+    const friendUser = await db.oneOrNone(
+      'SELECT user_id FROM users WHERE friend_code = $1 AND user_id != $2',
+      [friend_code, userId]
+    );
+    
+    if (!friendUser) {
+      return res.status(404).json({ message: 'User not found with this friend code' });
+    }
+    
+    const friendId = friendUser.user_id;
+    
+    // Check if request already exists
+    const existingRequest = await db.oneOrNone(
+      `SELECT * FROM friend_requests 
+       WHERE (sender_id = $1 AND receiver_id = $2) 
+          OR (sender_id = $2 AND receiver_id = $1)`,
+      [userId, friendId]
+    );
+    
+    if (existingRequest) {
+      return res.status(400).json({ message: 'Friend request already exists' });
+    }
+    
+    // Check if already friends
+    const existingFriend = await db.oneOrNone(
+      `SELECT * FROM user_to_friend 
+       WHERE (username = $1 AND friend_id = $2) 
+          OR (username = $2 AND friend_id = $1)`,
+      [userId, friendId]
+    );
+    
+    if (existingFriend) {
+      return res.status(400).json({ message: 'You are already friends with this user' });
+    }
+    
+    // Create new friend request
+    await db.none(
+      'INSERT INTO friend_requests (sender_id, receiver_id) VALUES ($1, $2)',
+      [userId, friendId]
+    );
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+app.put('/api/friends/request/:requestId', async (req, res) => {
+  try {
+    const { action } = req.body;
+    const requestId = req.params.requestId;
+    const userId = req.session.user.user_id;
+    
+    // Verify request exists and belongs to user
+    const request = await db.oneOrNone(
+      `SELECT * FROM friend_requests 
+       WHERE request_id = $1 AND receiver_id = $2 AND status = 'pending'`,
+      [requestId, userId]
+    );
+    
+    if (!request) {
+      return res.status(404).json({ message: 'Request not found' });
+    }
+    
+    const { sender_id, receiver_id } = request;
+    
+    if (action === 'accept') {
+      try {
+        await db.tx(async t => {
+          // Use INSERT ... ON CONFLICT DO NOTHING to safely handle duplicates
+          await t.none(`
+            INSERT INTO user_to_friend (username, friend_id) 
+            VALUES ($1, $2) 
+            ON CONFLICT (username, friend_id) DO NOTHING`,
+            [receiver_id, sender_id]
+          );
+          
+          await t.none(`
+            INSERT INTO user_to_friend (username, friend_id) 
+            VALUES ($1, $2) 
+            ON CONFLICT (username, friend_id) DO NOTHING`,
+            [sender_id, receiver_id]
+          );
+
+          // Update request status
+          await t.none(
+            'UPDATE friend_requests SET status = $1 WHERE request_id = $2',
+            ['accepted', requestId]
+          );
+        });
+      } catch (err) {
+        console.error('Transaction error:', err);
+        throw err;
+      }
+    } else if (action === 'reject') {
+      await db.none(
+        'UPDATE friend_requests SET status = $1 WHERE request_id = $2',
+        ['rejected', requestId]
+      );
+    } else {
+      return res.status(400).json({ message: 'Invalid action' });
+    }
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error processing friend request:', err);
+    res.status(500).json({ 
+      message: 'Server Error',
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
+});
+
+app.get('/api/friends', async (req, res) => {
+  try {
+    const userId = req.session.user.user_id;
+    const friends = await db.any(`
+      SELECT u.user_id, u.username, u.avatar, u.friend_code
+      FROM user_to_friend uf
+      JOIN users u ON uf.friend_id = u.user_id
+      WHERE uf.username = $1
+    `, [userId]);
+    
+    res.json(friends);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+app.get('/api/friends/requests', async (req, res) => {
+  try {
+    const userId = req.session.user.user_id;
+    const requests = await db.any(`
+      SELECT fr.request_id, fr.created_at, 
+             u.user_id, u.username, u.avatar, u.friend_code
+      FROM friend_requests fr
+      JOIN users u ON fr.sender_id = u.user_id
+      WHERE fr.receiver_id = $1 AND fr.status = 'pending'
+    `, [userId]);
+    
+    res.json(requests);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
   }
 });
 
