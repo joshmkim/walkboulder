@@ -1,36 +1,207 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Walk Boulder</title>
-
-  <link rel="stylesheet" href="../styles/style.css">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .bookmark-icon {
+      width: 20px;
+      height: 20px;
+    }
+    .search-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: white;
+      border-radius: 0 0 0.5rem 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin-top: -0.25rem;
+      display: none;
+    }
+    .search-dropdown-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.2s;
+    }
+    .search-dropdown-item:hover {
+      background-color: #f5f5f5;
+    }
+    .search-dropdown-item:last-child {
+      border-bottom: none;
+    }
+  </style>
 </head>
 <body>
-]
-
-
-  <div class="container">
-    <h1>WALK BOULDER</h1>
-    <p>WalkBoulder is a free web-mapping hand application that can be used by any Boulder local using modes of transportation other than their own. WalkBoulder is free and for residents who want a more walkable city. Unlike Google Maps, WalkBoulder is interactive and tailored specifically toward Boulder residents, with reviews and suggestions from verified locals.</p>
-
-    <input type="text" placeholder="Find Trails" class="search-bar">
-
-    <hr>
-
-
-    <div class="trail">
-      <div class="trail-info">
-        <h2></h2>
-        <p></p>
+  <div class="min-h-screen">
+    <!-- Hero Section -->
+    <div class="hero-section" style="background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&q=80&w=2070');
+      background-size: cover; background-position: center; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 1rem; margin-top: -56px; padding-top: 56px;">
+      <h1 style="color: white; font-size: 4rem; font-weight: bold; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">Walk Boulder</h1>
+      <div style="width: 100%; max-width: 600px; margin-bottom: 2rem; position: relative;">
+        <div style="position: relative; display: flex; align-items: center;">
+          <svg style="position: absolute; left: 1.5rem; width: 20px; height: 20px; color: #666;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" placeholder="Search by city, park, or trail name" style="width: 100%; padding: 1rem 1.5rem 1rem 3.5rem; font-size: 1.125rem; border: none; border-radius: 9999px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <ul class="search-dropdown" id="searchDropdown"></ul>
+        </div>
       </div>
-      <div class="trail-image">[Image Placeholder]</div>
+      <a href="maps" style="color: white; text-decoration: none; font-weight: 500; transition: opacity 0.2s;">Explore nearby trails</a>
     </div>
-    <hr>
 
+    <!-- Popular Trails Section -->
+    <div style="padding: 4rem 0; background: white;">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 2rem; color: #333;">Explore Trails Near You</h2>
+        <div id="trails-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;"></div>
+      </div>
+    </div>
   </div>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      let trails = [];
 
+      // Load trails data
+      try {
+        const response = await fetch('/api/trails');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        trails = await response.json();
+
+        const container = document.getElementById('trails-container');
+        if (!trails || trails.length === 0) {
+          container.innerHTML = '<p>No trails found. Check back later!</p>';
+          return;
+        }
+
+        // Render trail cards
+        container.innerHTML = trails.map(trail => `
+          <div class="trail-card" style="background: white; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s;">
+            <div style="position: relative;">
+              <a href="/trail/${trail.trail_id}" style="display: block; height: 200px;">
+                <img src="${trail.image_url}" alt="${trail.name}" style="width: 100%; height: 100%; object-fit: cover;">
+              </a>
+              <button class="bookmark-btn" data-trail-id="${trail.trail_id}" style="position: absolute; top: 1rem; right: 1rem; background: white; border: none; border-radius: 9999px; width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                <svg class="bookmark-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${trail.is_saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+            </div>
+            <div style="padding: 1.25rem;">
+              <a href="/trail/${trail.trail_id}" style="text-decoration: none; color: inherit;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">${trail.name}</h3>
+                <p style="color: #666; font-size: 0.875rem;">${trail.distance} mi • ${trail.difficulty}</p>
+                <p style="color: #666; font-size: 0.875rem;">${trail.location}</p>
+              </a>
+            </div>
+          </div>
+        `).join('');
+
+        // Initialize bookmark buttons
+        // In your home.hbs, update the bookmark button event listener:
+document.querySelectorAll('.bookmark-btn').forEach(btn => {
+  btn.addEventListener('click', async function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const trailId = this.getAttribute('data-trail-id');
+    const icon = this.querySelector('svg');
+    
+    try {
+      // Check if user is authenticated
+      const authResponse = await fetch('/api/check-auth');
+      const { isAuthenticated } = await authResponse.json();
+      
+      if (!isAuthenticated) {
+        window.location.href = '/login?returnTo=' + encodeURIComponent(window.location.pathname);
+        return;
+      }
+      
+      // Toggle bookmark
+      const toggleResponse = await fetch('/api/toggle-save-trail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ trailId })
+      });
+      
+      const { isSaved } = await toggleResponse.json();
+      
+      // Update icon - change to blue when saved
+      if (isSaved) {
+        icon.setAttribute('fill', '#3b82f6'); // Blue color
+      } else {
+        icon.setAttribute('fill', 'none');
+      }
+      
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+    }
+  });
+});
+
+      } catch (error) {
+        console.error("Error loading trails:", error);
+        document.getElementById('trails-container').innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+            <p style="color: #dc2626;">Failed to load trails. Please try again later.</p>
+            <p>Error: ${error.message}</p>
+          </div>
+        `;
+      }
+
+      // Search functionality
+      const input = document.querySelector('input[type="text"]');
+      const dropdown = document.getElementById('searchDropdown');
+
+      input.addEventListener('input', () => {
+        const query = input.value.toLowerCase().trim();
+        dropdown.innerHTML = '';
+
+        if (!query) {
+          dropdown.style.display = 'none';
+          return;
+        }
+
+        const matches = trails.filter(t =>
+          t.name.toLowerCase().includes(query) ||
+          t.location.toLowerCase().includes(query)
+        );
+
+        if (matches.length === 0) {
+          dropdown.style.display = 'none';
+          return;
+        }
+
+        matches.forEach(trail => {
+          const item = document.createElement('li');
+          item.className = 'search-dropdown-item';
+          item.innerHTML = `
+            <strong>${trail.name}</strong>
+            <div style="font-size: 0.875rem; color: #666;">${trail.location} • ${trail.distance}mi</div>
+          `;
+          item.addEventListener('click', () => {
+            window.location.href = `/trail/${trail.trail_id}`;
+          });
+          dropdown.appendChild(item);
+        });
+
+        dropdown.style.display = 'block';
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

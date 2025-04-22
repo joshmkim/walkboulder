@@ -1,55 +1,230 @@
-<header>
-  <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom shadow-sm">
-    <div class="container">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page</title>
+    
+    <!-- Internal CSS Styles -->
+    <style>
+        /* Navbar Styles */
+        .navbar {
+            transition: all 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
 
-      <!-- Sitename -->
-      <a class="navbar-brand fw-bold">WalkBoulder</a>
+        /* Initial transparent state */
+        .navbar.navbar-transparent {
+            background-color: transparent !important;
+            box-shadow: none;
+        }
 
-      <!-- Navbar Toggler -->
-      <button 
-        class="navbar-toggler" 
-        type="button" 
-        data-bs-toggle="collapse" 
-        data-bs-target="#navbar-collapse" 
-        aria-controls="navbar-collapse" 
-        aria-expanded="false" 
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+        /* Scrolled solid state */
+        .navbar.navbar-solid {
+            background-color: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
 
-      <!-- Home Link -->
-      <div class="collapse navbar-collapse" id="navbar-collapse">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/">Home</a>
-          </li>
-        </ul>
+        /* Navbar link colors */
+        .navbar-transparent .nav-link {
+            color: white !important;
+        }
 
-        <!-- Right side Links -->
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link fw-medium" href="/maps">Maps</a>
-          </li>
-          {{#if user}}
-            <!-- Show these when logged in -->
-            <li class="nav-item">
-              <a class="nav-link fw-medium" href="/profile">Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link fw-medium" href="/settings">Settings</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link fw-medium" href="/logout">Logout</a>
-            </li>
-          {{else}}
-            <!-- Show these when logged out -->
-            <li class="nav-item">
-              <a class="nav-link fw-medium" href="/login">Login</a>
-            </li>
-          {{/if}}
-        </ul>
-      </div>
+        .navbar-transparent .navbar-brand {
+            color: white !important;
+        }
 
+        /* When scrolled, change link colors */
+        .navbar-solid .nav-link {
+            color: #333 !important;
+        }
+
+        .navbar-solid .navbar-brand {
+            color: #333 !important;
+        }
+
+        /* Login button special styling */
+        .navbar-transparent .login-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 8px 16px;
+            color: white !important;
+        }
+
+        .navbar-solid .login-button {
+            background-color: #4a90e2;
+            color: white !important;
+        }
+
+        /* Add padding to body to account for fixed navbar */
+        body {
+            padding-top: 56px;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .confirm-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .cancel-button {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Your Navbar -->
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light navbar-transparent">
+            <div class="container">
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+                    <img src="https://icon-library.com/images/walk-icon-png/walk-icon-png-14.jpg" style="height: 40px;" />
+                    WalkBoulder
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbar-collapse">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/">Home</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/maps">Maps</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/reviews">Reviews</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/profile">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/settings">Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-medium logout-link" href="#">Logout</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link login-button" href="/login">Login</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal-content">
+            <h3>Are you sure you want to logout?</h3>
+            <div class="modal-buttons">
+                <button class="modal-button confirm-button" id="confirmLogout">Yes, Logout</button>
+                <button class="modal-button cancel-button" id="cancelLogout">Cancel</button>
+            </div>
+        </div>
     </div>
-  </nav>
-</header>
+
+    <!-- JavaScript for scroll effect and logout confirmation -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const navbar = document.querySelector('.navbar');
+        const solidRoutes = ['/maps', '/profile', '/settings', '/login', '/register', '/trail'];
+        const currentPath = window.location.pathname;
+
+        // Check if current path starts with any solid route (including trail pages)
+        if (solidRoutes.some(route => currentPath.startsWith(route))) {
+          navbar.classList.add('navbar-solid');
+          navbar.classList.remove('navbar-transparent');
+        } else {
+          if (window.scrollY === 0) {
+            navbar.classList.add('navbar-transparent');
+            navbar.classList.remove('navbar-solid');
+          } else {
+            navbar.classList.add('navbar-solid');
+            navbar.classList.remove('navbar-transparent');
+          }
+
+          window.addEventListener('scroll', function() {
+            if (window.scrollY === 0) {
+              navbar.classList.add('navbar-transparent');
+              navbar.classList.remove('navbar-solid');
+            } else {
+              navbar.classList.add('navbar-solid');
+              navbar.classList.remove('navbar-transparent');
+            }
+          });
+        }
+
+        // Logout modal
+        const logoutLink = document.querySelector('.logout-link');
+        const logoutModal = document.getElementById('logoutModal');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const cancelLogout = document.getElementById('cancelLogout');
+
+        logoutLink?.addEventListener('click', function(e) {
+          e.preventDefault();
+          logoutModal.style.display = 'flex';
+        });
+
+        confirmLogout?.addEventListener('click', function() {
+          window.location.href = '/logout';
+        });
+
+        cancelLogout?.addEventListener('click', function() {
+          logoutModal.style.display = 'none';
+        });
+
+        logoutModal?.addEventListener('click', function(e) {
+          if (e.target === logoutModal) {
+            logoutModal.style.display = 'none';
+          }
+        });
+      });
+    </script>
+</body>
+</html>

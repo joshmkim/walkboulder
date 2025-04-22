@@ -4,105 +4,425 @@
   <meta charset="UTF-8">
   <title>User Profile</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-  body {
-    background-color: #f8f9fa;
-    font-family: sans-serif;
-  }
+  <style>
+    /* Navbar Styles */
+    .navbar {
+      transition: all 0.3s ease;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1030;
+      background-color: white !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
 
-  .profile-card {
-    background-color: #fff;
-    max-width: 500px;
-    margin: 3rem auto; /* Added top margin */
-    padding: 2rem;
-    border: 1px solid #ccc;
-  }
+    .navbar .nav-link {
+      color: #333 !important;
+    }
+
+    .navbar .navbar-brand {
+      color: #333 !important;
+    }
+
+    .navbar .login-button {
+      background-color: #4a90e2;
+      color: white !important;
+    }
+
+    /* Body adjustments for fixed navbar */
+    body {
+      background-image: url('https://plus.unsplash.com/premium_photo-1744888432880-1b9c6fb1f612?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-color: #f0f2f5;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding-top: 70px; /* Added for navbar spacing */
+    }
+
+    .profile-card {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      max-width: 600px;
+      margin: 4rem auto;
+      padding: 3rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .profile-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
 
     .avatar {
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       object-fit: cover;
-      margin: 0 auto;
+      margin: 0 auto 1.5rem;
       border-radius: 50%;
       display: block;
+      border: 4px solid #fff;
+      box-shadow: 0 0 0 2px #e5e7eb;
+      transition: transform 0.3s ease;
     }
 
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-
-  .bio-text {
-    font-size: 1rem;
-    color: #555;
-  }
-
-  .achievements-box {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #f1f1f1;
-    padding: 1rem;
-  }
-
-  .friends-box {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background-color: #f9f9f9;
-  padding: 1rem;
-}
-
-  .friend-avatar {
-    width: 32px;
-    height: 32px;
-    object-fit: cover;
-    border-radius: 50%;
-  }
-
-.walks-box {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: #fefefe;
-  padding: 1rem;
-}
-
-  .custom-btn {
-    display: inline-block;
-    padding: 0.4rem 1rem;
-    font-size: 0.95rem;
-    background-color: #000;
-    color: white;
-    border: 1px solid #000;
-    border-radius: 5px;
-    text-decoration: none;
-    margin-top: 0.3rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    .avatar:hover {
+      transform: scale(1.05);
     }
 
-  .custom-btn:hover {
-    background-color: #333;
-  }
+    h2 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #111827;
+      letter-spacing: -0.025em;
+    }
 
-  .custom-btn.secondary {
-    background-color: white;
-    color: black;
-  }
+    .bio-text {
+      font-size: 1.125rem;
+      line-height: 1.75;
+      color: #4b5563;
+      margin-bottom: 2rem;
+      padding: 0 1rem;
+    }
 
-  .custom-btn.secondary:hover {
-    background-color: #eee;
-  }
-</style>
+    .actions-container {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
 
+    .custom-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .custom-btn::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .custom-btn:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .custom-btn.primary {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    .custom-btn.primary:hover {
+      background-color: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    .custom-btn.secondary {
+      background-color: white;
+      color: #1f2937;
+      border: 2px solid #e5e7eb;
+    }
+
+    .custom-btn.secondary:hover {
+      background-color: #f9fafb;
+      border-color: #d1d5db;
+      transform: translateY(-1px);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background-color: #10b981;
+      color: white;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Saved Trails Section */
+    .saved-trails-section {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .saved-trails-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .saved-trail-card {
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+    
+    .saved-trail-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .saved-trail-img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+    
+    .saved-trail-info {
+      padding: 1rem;
+    }
+    
+    .saved-trail-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .saved-trail-meta {
+      color: #666;
+      font-size: 0.875rem;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 1rem;
+    }
+    
+    .no-saved-trails {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+
+    /* New Friend System Styles */
+    .friend-code {
+      color: #6b7280;
+      font-size: 1rem;
+      font-weight: 400;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .friend-section {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .friend-tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 1.5rem;
+    }
+    
+    .friend-tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      color: #6b7280;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .friend-tab.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+    
+    .friend-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .friend-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .friend-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .friend-name {
+      font-weight: 500;
+      color: #111827;
+    }
+    
+    .friend-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .friend-action-btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      border-radius: 0.25rem;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .accept-btn {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .reject-btn {
+      background-color: #ef4444;
+      color: white;
+    }
+    
+    .add-friend-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .friend-code-input {
+      flex-grow: 1;
+      padding: 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.25rem;
+    }
+    
+    .no-friends {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+    }
+    
+    .friend-count {
+      background-color: #e5e7eb;
+      color: #4b5563;
+      border-radius: 9999px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .profile-card {
+        margin: 2rem 1rem;
+        padding: 2rem;
+      }
+
+      .actions-container {
+        flex-direction: column;
+      }
+
+      .custom-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
 </head>
 <body>
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar navbar-expand-sm navbar-light">
+      <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+          <img src="https://icon-library.com/images/walk-icon-png/walk-icon-png-14.jpg" style="height: 40px;" />
+          WalkBoulder
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-collapse">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/">Home</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/maps">Maps</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/reviews">Reviews</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/profile">Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/settings">Settings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link fw-medium logout-link" href="#">Logout</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link login-button" href="/login">Login</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Profile Content -->
   <div class="container text-center">
     <div class="profile-card">
       <!-- Avatar Image -->
-        <img src="{{userData.avatar}}" alt="Profile picture" class="avatar" id="avatarPreview">
+      <img src="{{userData.avatar}}" alt="Profile picture" class="avatar" id="avatarPreview">
+
+      <!-- Online Status -->
+      {{#if userData.isOnline}}
+        <div class="status-badge">Online</div>
+      {{/if}}
 
       <!-- User Name -->
       <h2>{{userData.name}}</h2>
+      <div class="friend-code">#{{userData.friend_code}}</div>
 
       <!--User's Id, so a friend can be added-->
       <p class="text-muted small">User ID: {{userData.ID}}</p>
@@ -111,7 +431,7 @@
       {{#if userData.bio}}
         <p class="bio-text">{{userData.bio}}</p>
       {{else}}
-        <p class="bio-text text-muted">This user hasn’t written a bio yet.</p>
+        <p class="bio-text text-muted">This user hasn't written a bio yet.</p>
       {{/if}}
 
       <!-- Friends Section -->
@@ -192,66 +512,218 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-4">
-        <a href="/settings" class="custom-btn">Edit Profile</a>
+      <div class="actions-container">
+        <a href="/settings" class="custom-btn primary">Edit Profile</a>
         <a href="/logout" class="custom-btn secondary">Logout</a>
+      </div>
+      
+      <!-- Add Friend Form -->
+      <div class="add-friend-form-container" style="margin-top: 1.5rem;">
+        <h4 style="margin-bottom: 0.5rem;">Add Friend</h4>
+        <form class="add-friend-form" id="addFriendForm">
+          <input type="text" class="friend-code-input" placeholder="Enter friend code" required>
+          <button type="submit" class="custom-btn primary" style="padding: 0.5rem 1rem;">Send Request</button>
+        </form>
       </div>
     </div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>  
-<script src="../../index.js"></script>
+<!-- Friends Section -->
+<div class="friend-section">
+  <div class="friend-tabs">
+    <div class="friend-tab active" data-tab="friends">Friends <span class="friend-count">{{friends.length}}</span></div>
+    <div class="friend-tab" data-tab="requests">Requests <span class="friend-count">{{friendRequests.length}}</span></div>
+  </div>
+  
+  <!-- Friends Tab -->
+  <div class="friend-tab-content" id="friendsTab">
+    {{#if friends.length}}
+      <div class="friend-list">
+        {{#each friends}}
+          <div class="friend-card">
+            <img src="{{this.avatar}}" class="friend-avatar">
+            <div style="flex-grow: 1;">
+              <div class="friend-name">{{this.username}}</div>
 
-<!-- Needs working on in order to function -->
-{{!-- <script>
-  const currentUserId = {{userData.user_id}};
-  const users = {{{json allUsers}}}; // [{ id: 1, name: 'Alice', avatar: 'url' }, ...]
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="no-friends">
+        <p>You don't have any friends yet.</p>
+      </div>
+    {{/if}}
+  </div>
+  
+  <!-- Requests Tab -->
+  <div class="friend-tab-content" id="requestsTab" style="display: none;">
+    {{#if friendRequests.length}}
+      <div class="friend-list">
+        {{#each friendRequests}}
+          <div class="friend-card">
+            <img src="{{this.sender_avatar}}" class="friend-avatar">
+            <div style="flex-grow: 1;">
+              <div class="friend-name">{{this.sender_username}}</div>
 
-  const input = document.getElementById("searchUserId");
-  const feedback = document.getElementById("searchFeedback");
-  const modal = new bootstrap.Modal(document.getElementById("userProfileModal"));
+              <div class="friend-actions">
+                <button class="friend-action-btn accept-btn" data-request-id="{{this.request_id}}">Accept</button>
+                <button class="friend-action-btn reject-btn" data-request-id="{{this.request_id}}">Reject</button>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="no-friends">
+        <p>You don't have any pending friend requests.</p>
+      </div>
+    {{/if}}
+  </div>
+</div>
 
-  const nameEl = document.getElementById("profileName");
-  const avatarEl = document.getElementById("profileAvatar");
-  const hiddenIdEl = document.getElementById("hiddenFriendId");
-  const profileIdText = document.getElementById("profileIdText");
+  <!-- Saved Trails Section -->
+  <div class="saved-trails-section">
+    <h2 class="section-title">My Saved Trails</h2>
+    {{#if savedTrails.length}}
+      <div class="saved-trails-grid">
+        {{#each savedTrails}}
+          <div class="saved-trail-card">
+            <a href="/trail/{{this.trail_id}}">
+              <img src="{{this.image_url}}" alt="{{this.name}}" class="saved-trail-img">
+              <div class="saved-trail-info">
+                <h3 class="saved-trail-title">{{this.name}}</h3>
+                <p class="saved-trail-meta">{{this.distance}} mi • {{this.difficulty}}</p>
+                <p class="saved-trail-meta">{{this.location}}</p>
+              </div>
+            </a>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="no-saved-trails">
+        <p>You haven't saved any trails yet.</p>
+        <a href="/" class="custom-btn primary" style="margin-top: 1rem;">Explore Trails</a>
+      </div>
+    {{/if}}
+  </div>
 
-  input.addEventListener("keypress", function (e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const enteredId = parseInt(input.value.trim());
+  <!-- JavaScript for logout confirmation and friend functionality -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Logout modal functionality
+      const logoutLink = document.querySelector('.logout-link');
+      const logoutModal = document.createElement('div');
+      logoutModal.className = 'modal-overlay';
+      logoutModal.style.display = 'none';
+      logoutModal.innerHTML = `
+        <div class="modal-content">
+          <h3>Are you sure you want to logout?</h3>
+          <div class="modal-buttons">
+            <button class="modal-button confirm-button" id="confirmLogout">Yes, Logout</button>
+            <button class="modal-button cancel-button" id="cancelLogout">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(logoutModal);
 
-      // Validate input
-      if (isNaN(enteredId)) {
-        feedback.textContent = "Please enter a valid numeric ID.";
-        return;
+      logoutLink?.addEventListener('click', function(e) {
+        e.preventDefault();
+        logoutModal.style.display = 'flex';
+      });
+
+      document.getElementById('confirmLogout')?.addEventListener('click', function() {
+        window.location.href = '/logout';
+      });
+
+      document.getElementById('cancelLogout')?.addEventListener('click', function() {
+        logoutModal.style.display = 'none';
+      });
+
+      logoutModal?.addEventListener('click', function(e) {
+        if (e.target === logoutModal) {
+          logoutModal.style.display = 'none';
+        }
+      });
+
+      // Friend system functionality
+      // Tab switching
+      const tabs = document.querySelectorAll('.friend-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          tabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          document.querySelectorAll('.friend-tab-content').forEach(content => {
+            content.style.display = 'none';
+          });
+          
+          const tabId = this.getAttribute('data-tab') + 'Tab';
+          document.getElementById(tabId).style.display = 'block';
+        });
+      });
+      
+      // Add friend form submission
+      const addFriendForm = document.getElementById('addFriendForm');
+      if (addFriendForm) {
+        addFriendForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const friendCode = this.querySelector('.friend-code-input').value.trim();
+          
+          try {
+            const response = await fetch('/api/friends/request', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ friend_code: friendCode })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+              alert('Friend request sent successfully!');
+              window.location.reload();
+            } else {
+              alert(data.message || 'Failed to send friend request');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while sending friend request');
+          }
+        });
       }
-
-      if (enteredId === currentUserId) {
-        feedback.textContent = "You can't add yourself as a friend!";
-        return;
-      }
-
-      const match = users.find(u => u.id === enteredId);
-
-      if (!match) {
-        feedback.textContent = "No user found with that ID.";
-        return;
-      }
-
-      // Clear feedback
-      feedback.textContent = "";
-
-      // Fill modal content
-      nameEl.textContent = match.name;
-      avatarEl.src = match.avatar;
-      hiddenIdEl.value = match.id;
-      profileIdText.textContent = `ID: ${match.id}`;
-
-      modal.show();
-    }
-  });
-</script> --}}
-
+      
+      // Handle friend request actions
+      document.querySelectorAll('.accept-btn, .reject-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          const requestId = this.getAttribute('data-request-id');
+          const action = this.classList.contains('accept-btn') ? 'accept' : 'reject';
+          
+          try {
+            const response = await fetch(`/api/friends/request/${requestId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ action })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+              alert(`Request ${action}ed successfully!`);
+              window.location.reload();
+            } else {
+              alert(data.message || `Failed to ${action} friend request`);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert(`An error occurred while ${action}ing friend request`);
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>

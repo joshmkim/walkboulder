@@ -1,18 +1,6 @@
-<html>
-    <div class="login-container">
-        <div class="login-header">
-            <h2>Welcome back</h2>
-            <p>Log in and start exploring</p>
-            
-        </div>
-
-
-
-    <style>
-        
-{{!-- nav {
+nav {
     display: none !important;
-} --}}
+}
 
 body {
     margin: 0;
@@ -108,34 +96,15 @@ body {
     text-decoration: underline;
 }
 
+.forgot-password {
+    display: block;
+    text-align: right;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+    text-decoration: none;
+}
 
-
-</style>
-
-
-        <form action="/login" method="POST">
-            <div class="form-group">
-                <label for="username">Email address</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-                
-            </div>
-
-            <button type="submit" class="login-button">Log in</button>
-        </form>
-
-        <div class="login-footer">
-            <p>Don't have an account? <a href="/register">Sign up for free</a></p>
-        </div>
-    </div>
-</body>
-
-
-{{!-- <script>
-        <link rel="stylesheet" href="/styles/login.css">
-</script> --}}
-</html>
+.forgot-password:hover {
+    text-decoration: underline;
+}

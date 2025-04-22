@@ -1,14 +1,17 @@
 -- Drop all tables first to avoid conflicts
+DROP TABLE IF EXISTS user_saved_trails CASCADE;
 DROP TABLE IF EXISTS user_to_history CASCADE;
 DROP TABLE IF EXISTS user_to_achievements CASCADE;
 DROP TABLE IF EXISTS user_to_friend CASCADE;
 DROP TABLE IF EXISTS trails_to_user CASCADE;
 DROP TABLE IF EXISTS trails_to_reviews CASCADE;
-DROP TABLE IF EXISTS history CASCADE;
 DROP TABLE IF EXISTS achievements CASCADE;
+DROP TABLE IF EXISTS history CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS trails CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS images CASCADE;
+DROP TABLE IF EXISTS friend_requests CASCADE;
 
 -- Create tables (order matters for foreign keys)
 CREATE TABLE trails 
@@ -18,16 +21,27 @@ CREATE TABLE trails
     start_location VARCHAR(100) NOT NULL,
     end_location VARCHAR(100) NOT NULL,
     name VARCHAR(100) NOT NULL,
+    image_url VARCHAR(300),
     trail_id SERIAL PRIMARY KEY
 );
 
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
-    username VARCHAR(30) NOT NULL,
+    username VARCHAR(30) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL,
-    total_distance INT, -- or DECIMAL
-    about VARCHAR(200),
-    avatar BYTEA
+    total_distance DECIMAL NOT NULL DEFAULT 0,
+    about TEXT NOT NULL DEFAULT '',
+    avatar BYTEA,
+    friend_code VARCHAR(10) UNIQUE
+);
+
+CREATE TABLE user_saved_trails (
+    user_id INT NOT NULL,
+    trail_id INT NOT NULL,
+    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
+    FOREIGN KEY (trail_id) REFERENCES trails (trail_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, trail_id)
 );
 
 CREATE TABLE achievements (
@@ -36,28 +50,37 @@ CREATE TABLE achievements (
     achievements_caption VARCHAR(200)
 );
 
+-- Update the reviews table to better match your needs
+CREATE TABLE reviews (
+    review_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+    trail_id INT REFERENCES trails(trail_id) ON DELETE CASCADE,
+    rating DECIMAL(2,1) NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    written_review TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, trail_id) -- Prevent duplicate reviews per user per trail
+);
+
+CREATE TABLE images (
+    image_id SERIAL PRIMARY KEY,
+    image_url VARCHAR(300) NOT NULL,
+    image_caption VARCHAR(200)
+);
+
 CREATE TABLE history (
     history_id SERIAL PRIMARY KEY,
     start_location VARCHAR(100) NOT NULL,
     end_location VARCHAR(100) NOT NULL,
     buddy VARCHAR(100) NOT NULL,
-    date DATE NOT NULL  -- Changed to DATE type
+    date DATE
 );
 
-CREATE TABLE IF NOT EXISTS reviews 
-(
-  review_id SERIAL PRIMARY KEY NOT NULL,
-  username VARCHAR(100),
-  review VARCHAR(200),
-  rating DECIMAL NOT NULL
-);
-
-CREATE TABLE trails_to_reviews 
-(
-  trail_id INT NOT NULL,
-  review_id INT NOT NULL,
-  FOREIGN KEY (trail_id) REFERENCES trails (trail_id) ON DELETE CASCADE,
-  FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
+CREATE TABLE trails_to_reviews (
+    trail_id INT NOT NULL,
+    review_id INT NOT NULL,
+    FOREIGN KEY (trail_id) REFERENCES trails (trail_id) ON DELETE CASCADE,
+    FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE,
+    PRIMARY KEY (trail_id, review_id)
 );
 
 CREATE TABLE trails_to_user (
@@ -73,10 +96,10 @@ CREATE TABLE user_to_friend (
     friend_id INT NOT NULL,
     FOREIGN KEY (username) REFERENCES users (user_id) ON DELETE CASCADE,
     FOREIGN KEY (friend_id) REFERENCES users (user_id) ON DELETE CASCADE,
-    PRIMARY KEY (username, friend_id)
+    PRIMARY KEY (username, friend_id),
+    CHECK (username != friend_id)
 );
 
--- Struggling to work
 CREATE TABLE user_to_achievements (
     username INT NOT NULL,
     achievements_id INT NOT NULL,
@@ -93,69 +116,114 @@ CREATE TABLE user_to_history (
     PRIMARY KEY (username, history_id)
 );
 
--- Creating a Trigger Function in order to add friends as a two-way relationship
-CREATE OR REPLACE FUNCTION make_friendship_mutual()
+CREATE TABLE friend_requests (
+    request_id SERIAL PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users (user_id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users (user_id) ON DELETE CASCADE,
+    CHECK (sender_id != receiver_id),
+    UNIQUE (sender_id, receiver_id) -- Prevent duplicate requests
+);
+
+-- Create index for faster friend lookups
+CREATE INDEX idx_user_friends ON user_to_friend(username, friend_id);
+
+-- Function to handle mutual friendship creation
+CREATE OR REPLACE FUNCTION create_mutual_friendship()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- Only create reciprocal friendship if it doesn't already exist
     IF NOT EXISTS (
-        SELECT 1 FROM user_to_friend
+        SELECT 1 FROM user_to_friend 
         WHERE username = NEW.friend_id AND friend_id = NEW.username
     ) THEN
         INSERT INTO user_to_friend (username, friend_id)
-        VALUES (NEW.friend_id, NEW.username);
+        VALUES (NEW.friend_id, NEW.username)
+        ON CONFLICT (username, friend_id) DO NOTHING;
     END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-    -- The trigger itself
-CREATE TRIGGER mutual_friendship
+-- Trigger for mutual friendships
+CREATE TRIGGER mutual_friendship_trigger
 AFTER INSERT ON user_to_friend
 FOR EACH ROW
-EXECUTE FUNCTION make_friendship_mutual();
+EXECUTE FUNCTION create_mutual_friendship();
 
--- Fixed achievements:
-INSERT INTO achievements (achievements_id, achievements_url, achievements_caption)
-    VALUES
-    (1, '', 'Record your first walk'),
-    (2, '', 'Add your first friend'),
-    (3, '', 'Leave your first review');
+-- =============================================
+-- SAMPLE DATA INSERTION
+-- =============================================
 
--- Preset Database Values:
-INSERT INTO users (user_id, username, password) 
-    VALUES
-    (1, 'Diana', 'passwordtest'),
-    (2, 'Helios', 'passwordtest2'),
-    (3, 'Minerva', 'passwordtest3'),
-    (4, 'Cerces', 'passwordtest4');
+-- Insert sample trails
+INSERT INTO trails (name, location, distance, difficulty, discription, average_rating, image_url) VALUES
+('Chautauqua Trail', 'Boulder', 1.2, 'easy', 'Iconic trail with stunning Flatiron views. Great for beginners.', 4.7, 'https://images.unsplash.com/photo-1551632811-561732d1e306'),
+('Royal Arch Trail', 'Boulder', 3.5, 'difficult', 'Challenging hike with rewarding arch formation at the top.', 4.8, 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4'),
+('Mount Sanitas Trail', 'Boulder', 3.3, 'moderate', 'Popular loop with great city views and rocky terrain.', 4.5, 'https://images.unsplash.com/photo-1470114716159-e389f8712fda'),
+('Bear Peak', 'Boulder', 5.1, 'very_difficult', 'One of Boulder''s most challenging hikes with panoramic views.', 4.9, 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81'),
+('Boulder Creek Path', 'Boulder', 5.5, 'easy', 'Paved multi-use path following Boulder Creek through town.', 4.2, 'https://images.unsplash.com/photo-1476231682828-37e571bc172f'),
+('Mesa Trail', 'Boulder', 6.7, 'moderate', 'Scenic 7-mile trail connecting multiple trailheads.', 4.6, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b'),
+('Flagstaff Mountain Trail', 'Boulder', 4.2, 'moderate', 'Beautiful summit views of Boulder with varied terrain', 4.4, 'https://images.unsplash.com/photo-1517649763962-0c623066013b'),
+('South Boulder Peak Trail', 'Boulder', 6.6, 'difficult', 'Highest peak in Boulder with incredible 360° views', 4.7, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b');
 
-INSERT INTO history (history_id, start_location, end_location, buddy, date)
-    VALUES
-    (1, '30th Street', 'Pearl Street', 'No Buddy', '2024-08-25'),
-    (2, 'Laguna Pl', 'Williams Village', 'Helios', '2025-01-13'),
-    (3, 'Inca Pkwy', 'Broadway', 'Minerva', '2025-02-28'),
-    (4, 'Parker', 'Havana', 'Ceres', '2025-03-09');
+-- Insert sample users with friend codes
+INSERT INTO users (username, password, total_distance, about, friend_code) VALUES
+('hiker_jane', 'securepass123', 28.4, 'Weekend warrior exploring all Boulder trails', 'JANE1234'),
+('mountain_mike', 'climbhigh22', 56.7, 'Ultra-runner and trail enthusiast', 'MIKE5678'),
+('nature_nate', 'leafytrails', 12.3, 'Casual hiker who loves photography', 'NATE9012');
 
-INSERT INTO user_to_history (username,  history_id)
-    VALUES
-    (1, 1),
-    (3, 2),
-    (4, 3),
-    (1, 4);
+-- Add sample saved trails
+INSERT INTO user_saved_trails (user_id, trail_id) VALUES
+(1, 2), (1, 5), (2, 4), (3, 1);
 
-INSERT INTO user_to_friend (username, friend_id) -- only need to insert values one way, the trigger will make it two-way
-    VALUES
-    (3, 2),
-    (1, 4),
-    (3, 4); 
+-- Sample reviews with proper user_id and trail_id references
+INSERT INTO reviews (user_id, trail_id, rating, written_review) VALUES
+-- hiker_jane (user_id 1) reviewing Royal Arch Trail (trail_id 2)
+(1, 2, 5, 'Absolutely loved the view from Royal Arch!'),
 
-INSERT INTO user_to_achievements (username, achievements_id)
-    VALUES
-    (1, 1),
-    (1, 2),
-    (2, 1),
-    (2, 2),
-    (3, 1),
-    (3, 2),
-    (4, 1),
-    (4, 2);
+-- mountain_mike (user_id 2) reviewing Bear Peak (trail_id 4)
+(2, 4, 4, 'Bear Peak kicked my butt but worth it'),
+
+-- nature_nate (user_id 3) reviewing Boulder Creek Path (trail_id 5)
+(3, 5, 5, 'Perfect easy walk along the creek'),
+
+-- mountain_mike (user_id 2) reviewing Flagstaff Mountain Trail (trail_id 7)
+(2, 7, 5, 'Flagstaff has the best sunset views!'),
+
+-- nature_nate (user_id 3) reviewing South Boulder Peak Trail (trail_id 8)
+(3, 8, 4, 'South Boulder Peak was tough but unforgettable');
+
+-- Note: The created_at field will automatically be set to CURRENT_TIMESTAMP
+
+-- Associate reviews with trails
+INSERT INTO trails_to_reviews (trail_id, review_id) VALUES
+(2, 1), (4, 2), (5, 3), (7, 4), (8, 5);
+
+-- Insert sample images
+INSERT INTO images (image_url, image_caption) VALUES
+('https://example.com/royalarch1.jpg', 'View from Royal Arch'),
+('https://example.com/bearpeak1.jpg', 'Summit of Bear Peak'),
+('https://example.com/creekpath1.jpg', 'Boulder Creek in fall'),
+('https://example.com/flagstaff1.jpg', 'Flagstaff Mountain sunset'),
+('https://example.com/southboulder1.jpg', 'View from South Boulder Peak');
+
+-- Associate images with reviews
+INSERT INTO reviews_to_images (image_id, review_id) VALUES
+(1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
+
+-- Sample hiking history
+INSERT INTO history (start_location, end_location, buddy, date) VALUES
+('Chautauqua Trailhead', 'Royal Arch', 'mountain_mike', '2023-05-15'),
+('NCAR', 'Bear Peak', 'hiker_jane', '2023-06-20');
+
+-- Sample friend relationships (will trigger mutual friendships)
+INSERT INTO user_to_friend (username, friend_id) VALUES
+(1, 2), (1, 3);
+
+-- Sample friend requests
+INSERT INTO friend_requests (sender_id, receiver_id, status) VALUES
+(2, 3, 'pending'),
+(3, 2, 'accepted');
