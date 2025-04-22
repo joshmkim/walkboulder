@@ -52,13 +52,6 @@ CREATE TABLE achievements (
     achievements_caption VARCHAR(200)
 );
 
--- CREATE TABLE reviews (
---     review_id SERIAL PRIMARY KEY,
---     username VARCHAR(100),
---     review VARCHAR(200),
---     rating DECIMAL NOT NULL
--- );
-
 -- Update the reviews table to better match your needs
 CREATE TABLE reviews (
     review_id SERIAL PRIMARY KEY,
@@ -195,17 +188,6 @@ INSERT INTO users (username, password, total_distance, about, friend_code) VALUE
 -- Add sample saved trails
 INSERT INTO user_saved_trails (user_id, trail_id) VALUES
 (1, 2), (1, 5), (2, 4), (3, 1);
-
--- Insert sample reviews
--- INSERT INTO reviews (username, review, rating) VALUES
--- ('hiker_jane', 'Absolutely loved the view from Royal Arch!', 5),
--- ('mountain_mike', 'Bear Peak kicked my butt but worth it', 4),
--- ('nature_nate', 'Perfect easy walk along the creek', 5),
--- ('mountain_mike', 'Flagstaff has the best sunset views!', 5),
--- ('nature_nate', 'South Boulder Peak was tough but unforgettable', 4);
-
--- First, let's get the user and trail IDs that we'll need for the foreign keys
--- Assuming these IDs exist from your sample data inserts
 
 -- Sample reviews with proper user_id and trail_id references
 INSERT INTO reviews (user_id, trail_id, rating, written_review) VALUES
