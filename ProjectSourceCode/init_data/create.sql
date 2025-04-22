@@ -52,11 +52,22 @@ CREATE TABLE achievements (
     achievements_caption VARCHAR(200)
 );
 
+-- CREATE TABLE reviews (
+--     review_id SERIAL PRIMARY KEY,
+--     username VARCHAR(100),
+--     review VARCHAR(200),
+--     rating DECIMAL NOT NULL
+-- );
+
+-- Update the reviews table to better match your needs
 CREATE TABLE reviews (
     review_id SERIAL PRIMARY KEY,
-    username VARCHAR(100),
-    review VARCHAR(200),
-    rating DECIMAL NOT NULL
+    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+    trail_id INT REFERENCES trails(trail_id) ON DELETE CASCADE,
+    rating DECIMAL(2,1) NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    written_review TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, trail_id) -- Prevent duplicate reviews per user per trail
 );
 
 CREATE TABLE images (
@@ -186,12 +197,34 @@ INSERT INTO user_saved_trails (user_id, trail_id) VALUES
 (1, 2), (1, 5), (2, 4), (3, 1);
 
 -- Insert sample reviews
-INSERT INTO reviews (username, review, rating) VALUES
-('hiker_jane', 'Absolutely loved the view from Royal Arch!', 5),
-('mountain_mike', 'Bear Peak kicked my butt but worth it', 4),
-('nature_nate', 'Perfect easy walk along the creek', 5),
-('mountain_mike', 'Flagstaff has the best sunset views!', 5),
-('nature_nate', 'South Boulder Peak was tough but unforgettable', 4);
+-- INSERT INTO reviews (username, review, rating) VALUES
+-- ('hiker_jane', 'Absolutely loved the view from Royal Arch!', 5),
+-- ('mountain_mike', 'Bear Peak kicked my butt but worth it', 4),
+-- ('nature_nate', 'Perfect easy walk along the creek', 5),
+-- ('mountain_mike', 'Flagstaff has the best sunset views!', 5),
+-- ('nature_nate', 'South Boulder Peak was tough but unforgettable', 4);
+
+-- First, let's get the user and trail IDs that we'll need for the foreign keys
+-- Assuming these IDs exist from your sample data inserts
+
+-- Sample reviews with proper user_id and trail_id references
+INSERT INTO reviews (user_id, trail_id, rating, written_review) VALUES
+-- hiker_jane (user_id 1) reviewing Royal Arch Trail (trail_id 2)
+(1, 2, 5, 'Absolutely loved the view from Royal Arch!'),
+
+-- mountain_mike (user_id 2) reviewing Bear Peak (trail_id 4)
+(2, 4, 4, 'Bear Peak kicked my butt but worth it'),
+
+-- nature_nate (user_id 3) reviewing Boulder Creek Path (trail_id 5)
+(3, 5, 5, 'Perfect easy walk along the creek'),
+
+-- mountain_mike (user_id 2) reviewing Flagstaff Mountain Trail (trail_id 7)
+(2, 7, 5, 'Flagstaff has the best sunset views!'),
+
+-- nature_nate (user_id 3) reviewing South Boulder Peak Trail (trail_id 8)
+(3, 8, 4, 'South Boulder Peak was tough but unforgettable');
+
+-- Note: The created_at field will automatically be set to CURRENT_TIMESTAMP
 
 -- Associate reviews with trails
 INSERT INTO trails_to_reviews (trail_id, review_id) VALUES
