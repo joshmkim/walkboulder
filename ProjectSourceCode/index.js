@@ -14,10 +14,26 @@ const FileType = require('file-type');
 
 // ------------- connecting to DB and adding handlebars -------------------------------
 const hbs = handlebars.create({
-  extname: 'hbs',
-  layoutsDir: __dirname + '/views/layouts',
-  partialsDir: __dirname + '/views/partials',
-});
+    extname: 'hbs',
+    layoutsDir: __dirname + '/views/layouts',
+    partialsDir: __dirname + '/views/partials',
+    helpers: {
+      times: function(n, block) {
+        let accum = '';
+        for (let i = 0; i < n; ++i) {
+          accum += block.fn(i);
+        }
+        return accum;
+      },
+      formatDate: function(date) {
+        return new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+    }
+  });
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/styles', express.static(path.join(__dirname, 'views/styles')));
@@ -229,6 +245,215 @@ app.get('/trail/:id', async (req, res) => {
   }
 });
 
+// Reviews routes
+app.get('/reviews', async (req, res) => {
+  try {
+    // Get all trails with their average ratings and review counts
+    const trails = await db.any(`
+      SELECT 
+        t.trail_id,
+        t.name as trail_name,
+        t.location,
+        t.difficulty,
+        t.image_url,
+        COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0) as avg_rating,
+        COUNT(r.review_id) as review_count
+      FROM trails t
+      LEFT JOIN reviews r ON t.trail_id = r.trail_id
+      GROUP BY t.trail_id
+      ORDER BY t.name
+    `);
+
+    // Get all reviews with user information
+    const allReviews = await db.any(`
+      SELECT 
+        r.*,
+        u.username,
+        u.user_id,
+        t.name as trail_name,
+        t.trail_id
+      FROM reviews r
+      JOIN users u ON r.user_id = u.user_id
+      JOIN trails t ON r.trail_id = t.trail_id
+      ORDER BY r.created_at DESC
+    `);
+
+    // Group reviews by trail_id
+    const reviewsByTrail = {};
+    allReviews.forEach(review => {
+      if (!reviewsByTrail[review.trail_id]) {
+        reviewsByTrail[review.trail_id] = [];
+      }
+      reviewsByTrail[review.trail_id].push(review);
+    });
+
+    // Get all trails for the dropdown
+    const allTrails = await db.any('SELECT * FROM trails ORDER BY name');
+
+    // Pass success/error messages from session
+    const successMessage = req.session.successMessage;
+    const errorMessage = req.session.errorMessage;
+    delete req.session.successMessage;
+    delete req.session.errorMessage;
+
+    res.render('pages/reviews', {
+      trails: trails.map(trail => ({
+        ...trail,
+        avg_rating: trail.avg_rating, // Already formatted in SQL
+        reviews: reviewsByTrail[trail.trail_id] || []
+      })),
+      allTrails,
+      successMessage,
+      errorMessage,
+      helpers: {
+        formatDate: function(date) {
+          return new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+        },
+        times: function(n, block) {
+          let accum = '';
+          for (let i = 0; i < n; ++i) {
+            accum += block.fn(i);
+          }
+          return accum;
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error loading reviews:', error);
+    res.status(500).render('pages/error', {
+      message: 'Failed to load reviews',
+      error: true
+    });
+  }
+});
+
+// Handle review submission
+const reviewUpload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+app.post('/reviews', reviewUpload.array('images', 5), async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).redirect('/login');
+    }
+
+    const { trail_id, rating, written_review } = req.body;
+    const user_id = req.session.user.user_id;
+
+    // Insert review
+    const review = await db.one(`
+      INSERT INTO reviews (user_id, trail_id, rating, written_review)
+      VALUES ($1, $2, $3, $4)
+      RETURNING review_id
+    `, [user_id, trail_id, rating, written_review]);
+
+    // Handle image uploads if any
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        // In a real app, you'd upload to cloud storage, but for simplicity we'll store the URL
+        const imageUrl = `/uploads/${Date.now()}-${file.originalname}`;
+        
+        // Insert image record
+        const image = await db.one(`
+          INSERT INTO images (image_url, image_caption)
+          VALUES ($1, $2)
+          RETURNING image_id
+        `, [imageUrl, `Image for review ${review.review_id}`]);
+
+        // Link image to review
+        await db.none(`
+          INSERT INTO reviews_to_images (image_id, review_id)
+          VALUES ($1, $2)
+        `, [image.image_id, review.review_id]);
+      }
+    }
+
+    // Update trail average rating
+    await db.none(`
+      UPDATE trails 
+      SET average_rating = (
+        SELECT AVG(rating) 
+        FROM reviews 
+        WHERE trail_id = $1
+      )
+      WHERE trail_id = $1
+    `, [trail_id]);
+
+    res.redirect('/reviews');
+  } catch (error) {
+    console.error('Error submitting review:', error);
+    res.status(500).render('pages/error', {
+      message: 'Failed to submit review',
+      error: true
+    });
+  }
+});
+
+app.post('/submit-review', async (req, res) => {
+  const { trail_id, rating, written_review } = req.body;
+  const userId = req.session.user?.user_id;
+
+  // Basic validation
+  if (!userId) {
+    req.session.errorMessage = 'You must be logged in to submit a review.';
+    return res.redirect('/login');
+  }
+
+  if (!trail_id || !rating || !written_review) {
+    req.session.errorMessage = 'All fields are required.';
+    return res.redirect('/reviews');
+  }
+
+  try {
+    // Check if user already reviewed this trail
+    const existingReview = await db.oneOrNone(
+      'SELECT 1 FROM reviews WHERE user_id = $1 AND trail_id = $2',
+      [userId, trail_id]
+    );
+
+    if (existingReview) {
+      req.session.errorMessage = 'You have already reviewed this trail.';
+      return res.redirect('/reviews');
+    }
+
+    // Insert the new review
+    await db.none(
+      'INSERT INTO reviews (trail_id, user_id, rating, written_review) VALUES ($1, $2, $3, $4)',
+      [trail_id, userId, parseFloat(rating), written_review]
+    );
+
+    // Update the trail's average rating
+    await db.none(`
+      UPDATE trails 
+      SET average_rating = (
+        SELECT AVG(rating)::numeric(10,1)
+        FROM reviews 
+        WHERE trail_id = $1
+      )
+      WHERE trail_id = $1
+    `, [trail_id]);
+
+    req.session.successMessage = 'Review submitted successfully!';
+    return res.redirect('/reviews');
+  } catch (error) {
+    console.error('Error saving review:', error);
+    
+    // Handle specific database errors
+    if (error.code === '23505') { // Unique violation
+      req.session.errorMessage = 'You have already reviewed this trail.';
+    } else {
+      req.session.errorMessage = 'Failed to save review. Please try again.';
+    }
+    
+    return res.redirect('/reviews');
+  }
+});
 // ---------- LOGIN/LOGOUT/REGISTER ----------------------------------------
 app.get('/register', (req, res) => {
   res.render('pages/register');
