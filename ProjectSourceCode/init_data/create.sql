@@ -21,6 +21,8 @@ CREATE TABLE trails
     start_location VARCHAR(100) NOT NULL,
     end_location VARCHAR(100) NOT NULL,
     name VARCHAR(100) NOT NULL,
+    difficulty DECIMAL,
+    description VARCHAR(1000),
     image_url VARCHAR(300),
     trail_id SERIAL PRIMARY KEY
 );
@@ -116,6 +118,14 @@ CREATE TABLE user_to_history (
     PRIMARY KEY (username, history_id)
 );
 
+CREATE TABLE reviews_to_images (
+    review_id INT NOT NULL,
+    image_id INT NOT NULL,
+    FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE,
+    FOREIGN KEY (image_id) REFERENCES images (image_id) ON DELETE CASCADE,
+    PRIMARY KEY (review_id, image_id)
+);
+
 CREATE TABLE friend_requests (
     request_id SERIAL PRIMARY KEY,
     sender_id INT NOT NULL,
@@ -159,15 +169,15 @@ EXECUTE FUNCTION create_mutual_friendship();
 -- =============================================
 
 -- Insert sample trails
-INSERT INTO trails (name, location, distance, difficulty, discription, average_rating, image_url) VALUES
-('Chautauqua Trail', 'Boulder', 1.2, 'easy', 'Iconic trail with stunning Flatiron views. Great for beginners.', 4.7, 'https://images.unsplash.com/photo-1551632811-561732d1e306'),
-('Royal Arch Trail', 'Boulder', 3.5, 'difficult', 'Challenging hike with rewarding arch formation at the top.', 4.8, 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4'),
-('Mount Sanitas Trail', 'Boulder', 3.3, 'moderate', 'Popular loop with great city views and rocky terrain.', 4.5, 'https://images.unsplash.com/photo-1470114716159-e389f8712fda'),
-('Bear Peak', 'Boulder', 5.1, 'very_difficult', 'One of Boulder''s most challenging hikes with panoramic views.', 4.9, 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81'),
-('Boulder Creek Path', 'Boulder', 5.5, 'easy', 'Paved multi-use path following Boulder Creek through town.', 4.2, 'https://images.unsplash.com/photo-1476231682828-37e571bc172f'),
-('Mesa Trail', 'Boulder', 6.7, 'moderate', 'Scenic 7-mile trail connecting multiple trailheads.', 4.6, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b'),
-('Flagstaff Mountain Trail', 'Boulder', 4.2, 'moderate', 'Beautiful summit views of Boulder with varied terrain', 4.4, 'https://images.unsplash.com/photo-1517649763962-0c623066013b'),
-('South Boulder Peak Trail', 'Boulder', 6.6, 'difficult', 'Highest peak in Boulder with incredible 360° views', 4.7, 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b');
+INSERT INTO trails (average_rating, distance, start_location, end_location, name, difficulty, description, image_url) VALUES
+(4.7, 0.4, 'Royal Arch Trail Head', 'Chautauqua Trail Overlook', 'Chautauqua Trail', 1, 'Iconic trail with stunning Flatiron views. Great for beginners.', 'https://images.unsplash.com/photo-1551632811-561732d1e306'),
+(4.8, 3.6, 'Royal Arch Trail Head', 'Royal Arch', 'Royal Arch Trail', 3, 'Challenging hike with rewarding arch formation at the top.', 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4'),
+(4.5, 2.4, 'Mount Sanitas Trailhead', 'Mount Sanitas', 'Mount Sanitas Trail', 3, 'Popular loop with great city views and rocky terrain.', 'https://images.unsplash.com/photo-1470114716159-e389f8712fda'),
+(4.9, 3.8, 'Bear Canyon', 'Bear Peak', 'Bear Peak Trail',  4.5, 'One of Boulder''s most challenging hikes with panoramic views.', 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81'),
+(4.2, 4.1, 'Boulder Creek Park', 'Boulder Canyon Trail', 'Boulder Creek Path', 2.5, 'Paved multi-use path following Boulder Creek through town.', 'https://images.unsplash.com/photo-1476231682828-37e571bc172f'),
+(4.6, 5.2, 'South Mesa Trailhead', 'Mesa Trail', 'Mesa Trail', 3.5, 'Scenic 7-mile trail connecting multiple trailheads.', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b'),
+(4.4, 3.6, 'Trail to Flagstaff Trailhead', 'Sunrise Amphitheater', 'Flagstaff Mountain Trail', 3, 'Beautiful summit views of Boulder with varied terrain', 'https://images.unsplash.com/photo-1517649763962-0c623066013b'),
+(4.7, 7.6, 'South Mesa Trailhead', 'South Boulder Peak', 'South Boulder Peak Trail', 4.8, 'Highest peak in Boulder with incredible 360° views', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b');
 
 -- Insert sample users with friend codes
 INSERT INTO users (username, password, total_distance, about, friend_code) VALUES
@@ -211,7 +221,7 @@ INSERT INTO images (image_url, image_caption) VALUES
 ('https://example.com/southboulder1.jpg', 'View from South Boulder Peak');
 
 -- Associate images with reviews
-INSERT INTO reviews_to_images (image_id, review_id) VALUES
+INSERT INTO reviews_to_images (review_id, image_id) VALUES
 (1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
 
 -- Sample hiking history
