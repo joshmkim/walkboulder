@@ -199,6 +199,10 @@ app.get('/api/trails', async (req, res) => {
   }
 });
 
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Trail details page
 app.get('/trail/:id', async (req, res) => {
   try {
@@ -822,6 +826,55 @@ app.get('/avatar/:userId', async (req, res) => {
   }
 });
 
+
+// --------------------------------------------------------------- Social Media "POSTS" endpoints -------------------------------------------------------------//
+
+// Route to render posts feed
+app.get('/posts', async (req, res) => {
+  try {
+    const rows = await db.any('SELECT post_img, caption FROM posts ORDER BY post_id DESC');
+
+    const posts = rows.map(post => ({
+      post_img: Buffer.isBuffer(post.post_img)
+        ? post.post_img.toString('base64')
+        : null,
+      caption: post.caption
+    }));
+
+    res.render('pages/posts', { posts });
+  } catch (err) {
+    console.error('Error fetching posts:', err.stack || err);
+    res.status(500).send('Server error while fetching posts.');
+  }
+});
+
+// Uploading a new post
+app.post('/upload_post_img', upload.single('post_img'), async (req, res) => {
+  try {
+    const { caption } = req.body;
+
+    if (!req.file || !caption) {
+      return res.status(400).send('Missing image or caption.');
+    }
+
+    // Insert into posts table using db.query
+    await db.query(
+      'INSERT INTO posts (post_img, caption) VALUES ($1, $2)',
+      [req.file.buffer, caption]
+    );
+    // res.json(posts);
+
+    res.redirect('/posts'); // Redirect to the posts feed
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error while uploading post.');
+  }
+});
+
+
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // document.addEventListener("DOMContentLoaded", function () {
 //   const input = document.getElementById('friendSearchInput');
 //   const resultsContainer = document.getElementById('searchResults');
@@ -1007,6 +1060,8 @@ app.post('/settings', async (req, res) => {
     });
   }
 });
+
+
 
 // ----------------------- starting the server -----------------------
 const server = app.listen(3000, () => {

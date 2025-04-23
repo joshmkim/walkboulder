@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Post Feed</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2070');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: white;
+    }
+
+    .post-carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      max-width: 1000px;
+      height: 600px;
+      margin: 4rem auto;
+      border: 6px solid #3b3f46;
+      border-radius: 14px;
+      box-shadow: 0 0 16px rgba(0, 0, 0, 0.4);
+      background-color: #1f1f24;
+    }
+
+    .post-carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      gap: 1.5rem;
+      padding: 1rem 0;
+      height: 100%;
+    }
+
+    .post-slide {
+      scroll-snap-align: center;
+      flex: 0 0 100%;
+      max-width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      background: #1f1f24;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .post-slide img {
+      width: 100%;
+      height: 75%;
+      object-fit: cover;
+      display: block;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .caption {
+      height: 25%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      color: #f1f1f1;
+      background-color: #1f1f24;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      background-color: rgba(59, 63, 70, 0.9);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .carousel-btn.left {
+      left: 10px;
+    }
+
+    .carousel-btn.right {
+      right: 10px;
+    }
+
+    .carousel-btn:hover {
+      background-color: rgba(89, 93, 100, 0.9);
+    }
+
+    .carousel-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
+    .create-post-btn {
+      background-color: #3b3f46;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .create-post-btn:hover {
+      background-color: #4a4e56;
+    }
+
+    .button-container {
+      text-align: center;
+      margin-top: 2rem;
+      margin-bottom: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="post-carousel-wrapper">
+    <div class="post-carousel" id="postCarousel">
+      {{#each posts}}
+        <div class="post-slide">
+          {{#if this.post_img}}
+            <img src="data:image/jpeg;base64,{{this.post_img}}" alt="Post Image" />
+          {{/if}}
+          <p class="caption">{{this.caption}}</p>
+        </div>
+      {{/each}}
+    </div>
+
+    <button class="carousel-btn left" onclick="scrollCarousel(-1)">
+      <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+    </button>
+    <button class="carousel-btn right" onclick="scrollCarousel(1)">
+      <svg viewBox="0 0 24 24"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+    </button>
+  </div>
+
+  <div class="button-container">
+    <button class="create-post-btn" onclick="openModal()">➕ Create a new post</button>
+  </div>
+
+  <div id="uploadModal" style="
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+  ">
+    <div style="
+      background-color: #2a2d34;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      width: 90%;
+      max-width: 500px;
+      color: white;
+      position: relative;
+    ">
+      <button onclick="closeModal()" style="
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+      ">&times;</button>
+
+      <h2 style="margin-top: 0;">Upload New Post</h2>
+      <form action="/upload_post_img" method="POST" enctype="multipart/form-data">
+        <div style="margin-bottom: 1rem;">
+          <label for="post_img">Select Image:</label><br>
+          <input type="file" name="post_img" required>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label for="caption">Caption:</label><br>
+          <textarea name="caption" rows="3" style="width: 100%;" required placeholder="Write your caption..."></textarea>
+        </div>
+        <button type="submit" style="
+          padding: 0.5rem 1.2rem;
+          background-color: #3a3f4b;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        ">📤 Submit Post</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function scrollCarousel(direction) {
+      const carousel = document.getElementById('postCarousel');
+      const scrollAmount = carousel.offsetWidth;
+      carousel.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+
+    function openModal() {
+      document.getElementById('uploadModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('uploadModal').style.display = 'none';
+    }
+
+    window.onclick = function(e) {
+      const modal = document.getElementById('uploadModal');
+      if (e.target === modal) closeModal();
+    };
+  </script>
+
+</body>
+</html>
