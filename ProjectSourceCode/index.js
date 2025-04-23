@@ -126,6 +126,30 @@ app.get('/api/check-auth', (req, res) => {
   res.json({ isAuthenticated: !!req.session.user });
 });
 
+app.post('/api/trails', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({error: 'Not authenticated'});
+    }
+
+    const userId = req.session.user.user_id;
+    const {trail_name, start, end, distance, rating, buddy} = req.body;
+
+    const trail = await db.oneOrNone(
+      'SELECT trail_id FROM trails WHERE name = $1',
+      [trail_name]
+    );
+
+    if (!trail) {
+      return res.status(400).json({error: 'Trail not found'});
+    }
+
+    const history = await db.one(
+      'INSERT INTO history ('
+    )
+  }
+});
+
 // API endpoint to toggle trail saving
 app.post('/api/toggle-save-trail', async (req, res) => {
   try {
