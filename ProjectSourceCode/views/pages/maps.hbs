@@ -1069,6 +1069,7 @@ startInput: commutesEl.modal.querySelector('input[name="start-address"]'),
             destinationModalEl.title.innerHTML = 'Add route';
             hideElement(destinationModalEl.deleteButton);
             hideElement(destinationModalEl.editButton);
+            showElement(destinationModalEl.title);
             showElement(destinationModalEl.form);
             showElement(destinationModalEl.startInput);
             showElement(destinationModalEl.addButton);
@@ -1367,6 +1368,7 @@ startAutocomplete.addListener('place_changed', () => {
           destinationModalEl.title.innerHTML = 'DELETE';
           destinationModalEl.destinationInput.value = destination.name;
           hideElement(destinationModalEl.form)
+          showElement(destinationModalEl.title);
           showElement(destinationModalEl.deleteButton);
           hideElement(destinationModalEl.editButton);
           hideElement(destinationModalEl.addButton);
@@ -1856,7 +1858,7 @@ function showElement(el, focusEl, displayOverride) {
         </div>
 
         <div class="destination-controls">
-          <button class="edit-button" aria-label="Save Trail" onclick="openSaveTrailModal('${destination.startAddress}', '${destination.destinationAddress}', '${destination.distance}')">
+          <button class="save-button" aria-label="Save Trail">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <use href="#commutes-save-icon"/>
             </svg>
