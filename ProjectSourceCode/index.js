@@ -548,6 +548,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.get('/profile', async (req, res) => {
   try {
     const user = req.session.user;
+    const userId = req.session.user.user_id;
 
     // Get saved trails
     const savedTrails = await db.any(`
@@ -555,7 +556,7 @@ app.get('/profile', async (req, res) => {
       FROM trails t
       JOIN user_saved_trails ust ON t.trail_id = ust.trail_id
       WHERE ust.user_id = $1
-    `, [user.user_id]);
+    `, [userId]);
 
     // Get friends
     const friends = await db.any(`
@@ -563,7 +564,7 @@ app.get('/profile', async (req, res) => {
       FROM user_to_friend uf
       JOIN users u ON uf.friend_id = u.user_id
       WHERE uf.username = $1
-    `, [user.user_id]);
+    `, [userId]);
     
     // Get pending requests with sender info
     const friendRequests = await db.any(`
@@ -577,7 +578,7 @@ app.get('/profile', async (req, res) => {
       FROM friend_requests fr
       JOIN users u ON fr.sender_id = u.user_id
       WHERE fr.receiver_id = $1 AND fr.status = 'pending'
-    `, [user.user_id]);
+    `, [userId]);
 
     const userData = {
       name: user.username,
@@ -601,7 +602,7 @@ app.get('/profile', async (req, res) => {
 
     // Check if user has left their first review
     const firstReview = await db.oneOrNone(
-      `SELECT 1 FROM reviews WHERE username = $1 LIMIT 1`,
+      `SELECT 1 FROM reviews WHERE user_id = $1 LIMIT 1`,
       [userId]
     );
 

@@ -185,7 +185,7 @@ document.querySelectorAll('.bookmark-btn').forEach(btn => {
           item.className = 'search-dropdown-item';
           item.innerHTML = `
             <strong>${trail.name}</strong>
-            <div style="font-size: 0.875rem; color: #666;">${trail.location} • ${trail.distance}mi</div>
+            <div style="font-size: 0.875rem; color: #666;">Round-trip Distance: ${trail.distance} mi • Difficulty: ${trail.difficulty} • Rating: ${trail.average_rating}</div>
           `;
           item.addEventListener('click', () => {
             window.location.href = `/trail/${trail.trail_id}`;
