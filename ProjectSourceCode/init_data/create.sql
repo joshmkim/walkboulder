@@ -29,6 +29,9 @@ CREATE TABLE trails
 
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
+    firstname VARCHAR(30),
+    lastname VARCHAR(30),
+    email VARCHAR(30),
     username VARCHAR(30) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL,
     total_distance DECIMAL NOT NULL DEFAULT 0,
