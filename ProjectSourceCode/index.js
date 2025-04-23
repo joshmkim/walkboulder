@@ -252,9 +252,12 @@ app.get('/reviews', async (req, res) => {
     const trails = await db.any(`
       SELECT 
         t.trail_id,
+        t.distance,
+        t.start_location,
+        t.end_location,
         t.name as trail_name,
-        t.location,
         t.difficulty,
+        t.description,
         t.image_url,
         COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0) as avg_rating,
         COUNT(r.review_id) as review_count
