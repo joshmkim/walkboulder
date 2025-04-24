@@ -77,7 +77,7 @@
     <div class="trail-header">
       <div>
         <h1 style="font-size: 3rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">{{trail.name}}</h1>
-        <p style="font-size: 1.25rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">{{trail.location}}</p>
+  
       </div>
     </div>
 
@@ -87,10 +87,6 @@
         <div class="stat-item">
           <div style="font-size: 0.875rem; color: #666;">Distance</div>
           <div style="font-weight: bold; font-size: 1.25rem;">{{trail.distance}} mi</div>
-        </div>
-        <div class="stat-item">
-          <div style="font-size: 0.875rem; color: #666;">Difficulty</div>
-          <div style="font-weight: bold; font-size: 1.25rem;">{{trail.difficulty}}</div>
         </div>
         <div class="stat-item">
           <div style="font-size: 0.875rem; color: #666;">Rating</div>
@@ -103,21 +99,7 @@
         <p style="line-height: 1.6;">{{trail.description}}</p>
       </div>
 
-      <!-- Trail Images Section -->
-      <div style="margin-top: 2rem;">
-        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Trail Images</h2>
-        {{#if trail.images}}
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
-            {{#each trail.images}}
-              <img src="{{this.image_url}}" alt="Trail photo" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
-            {{/each}}
-          </div>
-        {{else}}
-          <div class="no-images-placeholder">
-            No images available for this trail
-          </div>
-        {{/if}}
-      </div>
+
 
       <!-- Reviews Section -->
       <div class="reviews-section">
