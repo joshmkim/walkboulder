@@ -1927,9 +1927,9 @@ document.getElementById('trailForm').addEventListener('submit', function(e) {
   
   // Get form data
   const formData = {
-    name: document.getElementById('trailName').value,
-    start_location: document.getElementById('startLocation').value,
-    end_location: document.getElementById('endLocation').value,
+    trail_name: document.getElementById('trailName').value,
+    start: document.getElementById('startLocation').value,
+    end: document.getElementById('endLocation').value,
     distance: parseFloat(document.getElementById('trailDistance').value),
     average_rating: parseFloat(document.getElementById('trailRating').value) || null
   };
@@ -1941,7 +1941,13 @@ document.getElementById('trailForm').addEventListener('submit', function(e) {
       'Content-Type': 'application/json',
     },
     credentials: 'include', // Important for session cookies
-    body: JSON.stringify(formData)
+    body: JSON.stringify({
+      trail_name: formData.trail_name,
+      start_location: formData.start,
+      end_location: formData.end,
+      distance: formData.distance,
+      rating: formData.average_rating,
+    })
   })
   .then(response => {
     if (response.status === 401) {
@@ -1951,6 +1957,7 @@ document.getElementById('trailForm').addEventListener('submit', function(e) {
     if (!response.ok) {
       return response.json().then(err => { throw new Error(err.error); });
     }
+    console.log(response);
     return response.json();
   })
   .then(data => {
