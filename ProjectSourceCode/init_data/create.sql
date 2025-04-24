@@ -81,9 +81,10 @@ CREATE TABLE images (
 
 CREATE TABLE history (
     history_id SERIAL PRIMARY KEY,
+    trail_id INT NOT NULL REFERENCES trails(trail_id) ON DELETE CASCADE,
     start_location VARCHAR(100) NOT NULL,
     end_location VARCHAR(100) NOT NULL,
-    buddy VARCHAR(100) NOT NULL,
+    buddy VARCHAR(100),
     date DATE
 );
 
@@ -239,9 +240,9 @@ INSERT INTO reviews_to_images (review_id, image_id) VALUES
 (1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
 
 -- Sample hiking history
-INSERT INTO history (start_location, end_location, buddy, date) VALUES
-('Chautauqua Trailhead', 'Royal Arch', 'mountain_mike', '2023-05-15'),
-('NCAR', 'Bear Peak', 'hiker_jane', '2023-06-20');
+INSERT INTO history (trail_id, start_location, end_location, buddy, date) VALUES
+(2, 'Chautauqua Trailhead', 'Royal Arch', 'mountain_mike', '2023-05-15'),
+(4, 'NCAR', 'Bear Peak', 'hiker_jane', '2023-06-20');
 
 -- Sample friend relationships (will trigger mutual friendships)
 INSERT INTO user_to_friend (username, friend_id) VALUES

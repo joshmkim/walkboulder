@@ -111,6 +111,9 @@ document.querySelectorAll('.bookmark-btn').forEach(btn => {
     e.preventDefault();
     e.stopPropagation();
     const trailId = this.getAttribute('data-trail-id');
+    if (!trailId) {
+      console.error("Trail ID is null");
+    }
     const icon = this.querySelector('svg');
     
     try {

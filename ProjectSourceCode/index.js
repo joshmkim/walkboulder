@@ -61,7 +61,7 @@ db.connect()
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use(
   session({
@@ -124,6 +124,53 @@ app.get('/maps', (req, res) => {
 // API endpoint to check authentication status
 app.get('/api/check-auth', (req, res) => {
   res.json({ isAuthenticated: !!req.session.user });
+});
+
+app.post('/api/trails', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({error: 'Not authenticated'});
+    }
+    
+    const userId = req.session.user.user_id;
+    const {trail_name, start_location, end_location, distance, rating} = req.body;
+   
+    // Check if trail exists by name
+    let trail = await db.oneOrNone(
+      'SELECT trail_id FROM trails WHERE name = $1',
+      [trail_name]
+    );
+
+    if (!trail) {
+      trail = await db.one(
+        'INSERT INTO trails (name, start_location, end_location, distance, average_rating) ' +
+        'VALUES ($1, $2, $3, $4, $5) ' + 
+        ' RETURNING trail_id',
+        [trail_name, start_location, end_location, distance, rating]
+      );
+    }
+
+    // create a new record
+    const today = new Date().toISOString().split('T')[0];
+    const history = await db.one(
+      `INSERT INTO history (trail_id, start_location, end_location, date)
+       VALUES ($1, $2, $3, $4)
+       RETURNING history_id`,
+      [trail.trail_id, start_location, end_location, today]
+    );
+
+    // Link user to the history entry
+    await db.none(
+      `INSERT INTO user_to_history (username, history_id)
+       VALUES ($1, $2)`,
+      [userId, history.history_id]
+    );
+
+    res.status(200).json({success: true});
+  } catch (error) {
+    console.error('Error saving hike to history:', error);
+    res.status(500).json({ error: 'Failed to save hike to history' });
+  }
 });
 
 // API endpoint to toggle trail saving
