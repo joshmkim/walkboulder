@@ -226,6 +226,10 @@
             e.preventDefault();
             e.stopPropagation();
             const trailId = this.getAttribute('data-trail-id');
+            if (!trailId) {
+              console.error("Trail ID is null");
+              return;
+            }
             const icon = this.querySelector('svg');
             
             try {
@@ -249,9 +253,9 @@
               
               const { isSaved } = await toggleResponse.json();
               
-              // Update icon
+              // Update icon - change to blue when saved
               if (isSaved) {
-                icon.setAttribute('fill', '#3b82f6');
+                icon.setAttribute('fill', '#3b82f6'); // Blue color
               } else {
                 icon.setAttribute('fill', 'none');
               }
