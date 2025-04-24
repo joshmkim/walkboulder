@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS images CASCADE;
 DROP TABLE IF EXISTS friend_requests CASCADE;
 
+
 -- Create tables (order matters for foreign keys)
 CREATE TABLE trails 
 (
@@ -252,6 +253,8 @@ INSERT INTO user_to_friend (username, friend_id) VALUES
 INSERT INTO friend_requests (sender_id, receiver_id, status) VALUES
 (2, 3, 'pending'),
 (3, 2, 'accepted');
+
+
 
 
 -- social media insert
