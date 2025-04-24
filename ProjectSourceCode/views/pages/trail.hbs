@@ -111,18 +111,8 @@
                 <span style="font-weight: bold;">{{this.username}}</span>
                 <span>Rating: {{this.rating}}/5</span>
               </div>
-              <p>{{this.review}}</p>
-              {{#if this.images}}
-                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                  {{#each this.images}}
-                    <img src="{{this.image_url}}" alt="Review photo" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;">
-                  {{/each}}
-                </div>
-              {{else}}
-                <div class="no-images-placeholder" style="height: 100px; margin-top: 1rem;">
-                  No images for this review
-                </div>
-              {{/if}}
+      <p>{{this.written_review}}</p>
+
             </div>
           {{/each}}
         {{else}}
