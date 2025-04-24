@@ -271,12 +271,11 @@ app.get('/trail/:id', async (req, res) => {
     
     // Get reviews for this trail
     const reviews = await db.any(`
-    SELECT r.*, u.username
-    FROM reviews r
-    JOIN users u ON r.user_id = u.user_id
-    WHERE r.trail_id = $1
-    ORDER BY r.created_at DESC
-  `, [trailId]);
+      SELECT r.* 
+      FROM reviews r
+      JOIN trails_to_reviews tr ON r.review_id = tr.review_id
+      WHERE tr.trail_id = $1
+    `, [trailId]);
     
     // Get images for each review
     for (const review of reviews) {
@@ -422,7 +421,10 @@ app.post('/reviews', reviewUpload.array('images', 5), async (req, res) => {
         `, [imageUrl, `Image for review ${review.review_id}`]);
 
         // Link image to review
-
+        await db.none(`
+          INSERT INTO reviews_to_images (image_id, review_id)
+          VALUES ($1, $2)
+        `, [image.image_id, review.review_id]);
       }
     }
 
@@ -506,11 +508,6 @@ app.post('/submit-review', async (req, res) => {
     return res.redirect('/reviews');
   }
 });
-
-
-
-
-
 // ---------- LOGIN/LOGOUT/REGISTER ----------------------------------------
 app.get('/register', (req, res) => {
   res.render('pages/register');
