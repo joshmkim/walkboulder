@@ -1990,21 +1990,30 @@ document.getElementById('trailForm').addEventListener('submit', async function(e
     average_rating: parseFloat(document.getElementById('trailRating').value) || null // Optional field
   };
 
+  console.log("post api:", trailData)
+
   try {
     // Send POST request to your backend
     const response = await fetch('/api/trails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(trailData),
-      credentials: 'include' // Required for session cookies
-    });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(trailData),
+  credentials: 'include'
+});
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to save trail');
-    }
+const contentType = response.headers.get('content-type');
+
+if (!response.ok) {
+  if (contentType && contentType.includes('application/json')) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to save trail');
+  } else {
+    const errorText = await response.text();
+    console.error('Non-JSON error:', errorText);
+    throw new Error('Unexpected server response');
+  }
+}
+
 
     const savedTrail = await response.json();
     console.log('Trail saved:', savedTrail);
@@ -2024,9 +2033,6 @@ document.getElementById('trailForm').addEventListener('submit', async function(e
   }
 });
 
-
-
-
 // Add this style for read-only fields
 const style = document.createElement('style');
 style.textContent = `
@@ -2039,7 +2045,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 </script>
-  
+<script src="index.js"></script>
   
   
   
