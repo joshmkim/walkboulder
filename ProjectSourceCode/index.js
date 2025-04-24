@@ -127,14 +127,13 @@ app.get('/api/check-auth', (req, res) => {
 });
 
 app.post('/api/trails', async (req, res) => {
-  console.log(req.body);
   try {
     if (!req.session.user) {
       return res.status(401).json({error: 'Not authenticated'});
     }
     
     const userId = req.session.user.user_id;
-    const {trail_name, start, end, distance, rating, buddy} = req.body;
+    const {trail_name, start_location, end_location, distance, rating} = req.body;
    
     // Check if trail exists by name
     let trail = await db.oneOrNone(
@@ -144,10 +143,10 @@ app.post('/api/trails', async (req, res) => {
 
     if (!trail) {
       trail = await db.one(
-        `INSERT INTO trails (name, start_location, end_location, distance, average_rating)
-         VALUES ($1, $2, $3, $4, $5)
-         RETURNING trail_id`,
-        [trail_name, start, end, distance, rating]
+        'INSERT INTO trails (name, start_location, end_location, distance, average_rating) ' +
+        'VALUES ($1, $2, $3, $4, $5) ' + 
+        ' RETURNING trail_id',
+        [trail_name, start_location, end_location, distance, rating]
       );
     }
 
@@ -155,9 +154,9 @@ app.post('/api/trails', async (req, res) => {
     const today = new Date().toISOString().split('T')[0];
     const history = await db.one(
       `INSERT INTO history (trail_id, start_location, end_location, date, buddy)
-       VALUES ($1, $2, $3, $4, $5)
+       VALUES ($1, $2, $3, $4)
        RETURNING history_id`,
-      [trail.trail_id, start, end, today, buddy]
+      [trail.trail_id, start_location, end_location, today]
     );
 
     // Link user to the history entry
