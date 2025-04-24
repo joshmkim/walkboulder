@@ -1,5 +1,5 @@
 # WalkBoulder
-## 1. Application Desscription
+## 1. Application Description
 Design walking application that implements a map that is valuable to locals of Boulder who love walking. Users will be allowed to create their own routes to different areas around Boulder. It will also allow users to track their distance, fellow users, routes. There will be a reward system to encourage walking / exploring Boulder and using the application.
 
 ## 2. Contributors
