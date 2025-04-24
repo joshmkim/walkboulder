@@ -207,41 +207,42 @@ app.get('/trail/:id', async (req, res) => {
     // Get trail details
     const trail = await db.one('SELECT * FROM trails WHERE trail_id = $1', [trailId]);
     
-    // Check if user has saved this trail
-    if (req.session.user) {
-      const isSaved = await db.oneOrNone(
-        'SELECT 1 FROM user_saved_trails WHERE user_id = $1 AND trail_id = $2',
-        [req.session.user.user_id, trailId]
-      );
-      trail.is_saved = !!isSaved;
-    } else {
-      trail.is_saved = false;
-    }
-    
-    // Get reviews for this trail
+    // Get reviews for this trail with user info
     const reviews = await db.any(`
-      SELECT r.* 
+      SELECT 
+        r.*,
+        u.username,
+        u.user_id
       FROM reviews r
-      JOIN trails_to_reviews tr ON r.review_id = tr.review_id
-      WHERE tr.trail_id = $1
+      JOIN users u ON r.user_id = u.user_id
+      WHERE r.trail_id = $1
+      ORDER BY r.created_at DESC
     `, [trailId]);
-    
+
     // Get images for each review
     for (const review of reviews) {
       review.images = await db.any(`
-        SELECT i.* 
+        SELECT i.image_url 
         FROM images i
         JOIN reviews_to_images ri ON i.image_id = ri.image_id
         WHERE ri.review_id = $1
       `, [review.review_id]);
     }
-    
-    trail.reviews = reviews;
-    
-    res.render('pages/trail', { trail });
-  } catch (err) {
-    console.error('Error fetching trail:', err);
-    res.status(404).render('pages/404', { message: 'Trail not found' });
+
+    res.render('pages/trail', { 
+      trail: {
+        ...trail,
+        reviews: reviews
+      },
+      is_saved: req.session.user 
+        ? await db.oneOrNone(
+            'SELECT 1 FROM user_saved_trails WHERE user_id = $1 AND trail_id = $2',
+            [req.session.user.user_id, trailId]
+          )
+        : false
+    });
+  } catch (error) {
+    res.status(404).render('pages/404');
   }
 });
 
