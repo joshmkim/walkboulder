@@ -14,12 +14,7 @@ INSERT INTO users (user_id, username, password)
     (3, 'Minerva', 'passwordtest3'),
     (4, 'Cerces', 'passwordtest4');
 
-INSERT INTO user_to_history (username,  history_id)
-    VALUES
-    (1,1),
-    (1,2),
-    (1,3),
-    (1,4);
+
 
 /* IF A USER HAS WALKED WITH THREE DISTINCT FRIENDS */
 SELECT 
@@ -34,6 +29,11 @@ WHERE
     AND history.buddy != 'No Buddy'
     AND LOWER(history.buddy) != 'no buddy'; -- accounting for case sensitive no buddy
 
-
+/*
+ unique_buddies 
+----------------
+              3
+(1 row)
+*/
 
 /* either add a trigger (in create.sql) or a back-end code (in index.js) to make the achievement critria easier*/

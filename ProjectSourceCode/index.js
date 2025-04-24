@@ -199,6 +199,10 @@ app.get('/api/trails', async (req, res) => {
   }
 });
 
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Trail details page
 app.get('/trail/:id', async (req, res) => {
   try {
@@ -252,9 +256,12 @@ app.get('/reviews', async (req, res) => {
     const trails = await db.any(`
       SELECT 
         t.trail_id,
+        t.distance,
+        t.start_location,
+        t.end_location,
         t.name as trail_name,
-        t.location,
         t.difficulty,
+        t.description,
         t.image_url,
         COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0) as avg_rating,
         COUNT(r.review_id) as review_count
@@ -545,12 +552,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.get('/profile', async (req, res) => {
   try {
     const user = req.session.user;
-    const userData = {
-      name: user.username,
-      avatar: `/avatar/${user.user_id}`,
-      bio: user.bio || "This user hasn't written a bio yet.",
-      friend_code: user.friend_code
-    };
+    const userId = req.session.user.user_id;
 
     // Get saved trails
     const savedTrails = await db.any(`
@@ -558,7 +560,7 @@ app.get('/profile', async (req, res) => {
       FROM trails t
       JOIN user_saved_trails ust ON t.trail_id = ust.trail_id
       WHERE ust.user_id = $1
-    `, [user.user_id]);
+    `, [userId]);
 
     // Get friends
     const friends = await db.any(`
@@ -566,7 +568,7 @@ app.get('/profile', async (req, res) => {
       FROM user_to_friend uf
       JOIN users u ON uf.friend_id = u.user_id
       WHERE uf.username = $1
-    `, [user.user_id]);
+    `, [userId]);
     
     // Get pending requests with sender info
     const friendRequests = await db.any(`
@@ -580,7 +582,49 @@ app.get('/profile', async (req, res) => {
       FROM friend_requests fr
       JOIN users u ON fr.sender_id = u.user_id
       WHERE fr.receiver_id = $1 AND fr.status = 'pending'
-    `, [user.user_id]);
+    `, [userId]);
+
+    const userData = {
+      name: user.username,
+      avatar: `/avatar/${user.user_id}`,
+      bio: user.bio || "This user hasn't written a bio yet.",
+      friend_code: user.friend_code
+    };
+
+// achievements
+    // Check if user has taken their first walk
+    const firstWalk = await db.oneOrNone(
+      `SELECT 1 FROM user_to_history WHERE username = $1 LIMIT 1`,
+      [userId]
+    );
+
+    // Check if user has added their first friend
+    const firstFriend = await db.oneOrNone(
+      `SELECT 1 FROM user_to_friend WHERE username = $1 LIMIT 1`,
+      [userId]
+    );
+
+    // Check if user has left their first review
+    const firstReview = await db.oneOrNone(
+      `SELECT 1 FROM reviews WHERE user_id = $1 LIMIT 1`,
+      [userId]
+    );
+
+    // Collect earned achievements
+    const achievements = [];
+    if (firstWalk) achievements.push({ title: "Take your first walk" });
+    if (firstFriend) achievements.push({ title: "Add your first friend" });
+    if (firstReview) achievements.push({ title: "Leave your first review" });
+
+    // recent walks
+    const recentWalksQuery = `SELECT history.date, history.buddy 
+                              FROM history INNER JOIN user_to_history 
+                              ON history.history_id = user_to_history.history_id 
+                              INNER JOIN users ON users.user_id = user_to_history.username 
+                              WHERE user_to_history.username = $1
+                              ORDER BY history.date DESC 
+                              LIMIT 3`;
+    const recentWalks = await db.any(recentWalksQuery, [userId]);
 
     res.render('pages/profile', { 
       userData,
@@ -782,6 +826,177 @@ app.get('/avatar/:userId', async (req, res) => {
   }
 });
 
+
+// --------------------------------------------------------------- Social Media "POSTS" endpoints -------------------------------------------------------------//
+
+// Route to render posts feed
+app.get('/posts', async (req, res) => {
+  try {
+    const rows = await db.any('SELECT post_img, caption FROM posts ORDER BY post_id DESC');
+
+    const posts = rows.map(post => ({
+      post_img: Buffer.isBuffer(post.post_img)
+        ? post.post_img.toString('base64')
+        : null,
+      caption: post.caption
+    }));
+
+    res.render('pages/posts', { posts });
+  } catch (err) {
+    console.error('Error fetching posts:', err.stack || err);
+    res.status(500).send('Server error while fetching posts.');
+  }
+});
+
+// Uploading a new post
+app.post('/upload_post_img', upload.single('post_img'), async (req, res) => {
+  try {
+    const { caption } = req.body;
+
+    if (!req.file || !caption) {
+      return res.status(400).send('Missing image or caption.');
+    }
+
+    // Insert into posts table using db.query
+    await db.query(
+      'INSERT INTO posts (post_img, caption) VALUES ($1, $2)',
+      [req.file.buffer, caption]
+    );
+    // res.json(posts);
+
+    res.redirect('/posts'); // Redirect to the posts feed
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error while uploading post.');
+  }
+});
+
+
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// document.addEventListener("DOMContentLoaded", function () {
+//   const input = document.getElementById('friendSearchInput');
+//   const resultsContainer = document.getElementById('searchResults');
+
+//   if (!input || !resultsContainer) return;
+
+//   input.addEventListener('input', async function () {
+//     const query = input.value.trim();
+
+//     if (query.length < 2) {
+//       resultsContainer.innerHTML = '';
+//       return;
+//     }
+
+//     try {
+//       const res = await fetch(`/search-friends?q=${encodeURIComponent(query)}`);
+//       const data = await res.json();
+
+//       if (data.length === 0) {
+//         resultsContainer.innerHTML = '<p class="text-muted">No users found.</p>';
+//       } else {
+//         resultsContainer.innerHTML = data.map(user => `
+//           <div class="d-flex justify-content-between align-items-center mb-2">
+//             <span>${user.username}</span>
+//             <form method="POST" action="/add-friend">
+//               <input type="hidden" name="search" value="${user.username}">
+//               <button type="submit" class="btn btn-sm btn-success">Add</button>
+//             </form>
+//           </div>
+//         `).join('');
+//       }
+//     } catch (err) {
+//       resultsContainer.innerHTML = '<p class="text-danger">Error searching users.</p>';
+//     }
+//   });
+// });
+
+// Friend Search
+app.post('/add-friend', async (req, res) => {
+  const currentUserId = req.session.userId;
+  const searchTerm = req.body.search;
+
+  // Find the user by username
+  const userResult = await db.query(
+    'SELECT user_id FROM users WHERE username = $1 AND user_id != $2',
+    [searchTerm, currentUserId]
+  );
+
+  if (userResult.rows.length === 0) {
+    return res.send('User not found or already added.');
+  }
+
+  const friendId = userResult.rows[0].user_id;
+
+  // Check if already friends
+  const existing = await db.query(
+    'SELECT * FROM user_to_friend WHERE user_id = $1 AND friend_id = $2',
+    [currentUserId, friendId]
+  );
+
+  if (existing.rows.length === 0) {
+    // Add to user_to_friend
+
+    // if we want to make it one way
+      // await db.query(
+      //   'INSERT INTO user_to_friend (user_id, friend_id) VALUES ($1, $2)',
+      //   [currentUserId, friendId]
+      // );
+
+    // to make it bidirectional
+    await db.query(
+      `INSERT INTO user_to_friend (user_id, friend_id)
+       VALUES ($1, $2), ($2, $1)
+       ON CONFLICT DO NOTHING`,
+      [currentUserId, friendId]
+    );
+  }
+
+  res.redirect('/profile');
+});
+// // Friend search API
+// app.get('/search-friends', async (req, res) => {
+//   const search = req.query.q;
+//   const currentUserId = req.session.userId;
+
+//   if (!search) return res.json([]);
+
+//   try {
+//     const users = await db.any(
+//       `SELECT username FROM users 
+//        WHERE username ILIKE $1 AND user_id != $2 
+//        LIMIT 10`, 
+//       [`%${search}%`, currentUserId]
+//     );
+//     res.json(users);
+//   } catch (err) {
+//     console.error('Search error:', err);
+//     res.status(500).json([]);
+//   }
+// });
+
+// // In your route handler
+// router.get("/find-friends", async (req, res) => {
+//   const currentUser = req.session.user;
+
+//   const allUsers = await db.any('SELECT user_id AS id, username AS name, encode(avatar, \'base64\') AS avatar FROM users');
+
+//   // Convert avatars if needed
+//   const usersWithAvatars = allUsers.map(user => ({
+//     ...user,
+//     avatar: user.avatar 
+//       ? `data:image/png;base64,${user.avatar}` 
+//       : 'https://i.pravatar.cc/100?u=' + user.id
+//   }));
+
+//   res.render("find-friends", {
+//     userData: currentUser,
+//     allUsers: usersWithAvatars
+//   });
+// });
+
+
 // --------------------------------------- SETTINGS ENDPOINTS ------------------------------------------------------------------
 app.get('/settings', (req, res) => {
   const user = req.session.user;
@@ -845,6 +1060,8 @@ app.post('/settings', async (req, res) => {
     });
   }
 });
+
+
 
 // ----------------------- starting the server -----------------------
 const server = app.listen(3000, () => {
