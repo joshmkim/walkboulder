@@ -153,7 +153,7 @@ app.post('/api/trails', async (req, res) => {
     // create a new record
     const today = new Date().toISOString().split('T')[0];
     const history = await db.one(
-      `INSERT INTO history (trail_id, start_location, end_location, date, buddy)
+      `INSERT INTO history (trail_id, start_location, end_location, date)
        VALUES ($1, $2, $3, $4)
        RETURNING history_id`,
       [trail.trail_id, start_location, end_location, today]
@@ -161,7 +161,7 @@ app.post('/api/trails', async (req, res) => {
 
     // Link user to the history entry
     await db.none(
-      `INSERT INTO user_to_history (user_id, history_id)
+      `INSERT INTO user_to_history (username, history_id)
        VALUES ($1, $2)`,
       [userId, history.history_id]
     );
