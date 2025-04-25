@@ -583,7 +583,7 @@ app.get('/profile', async (req, res) => {
       friend_code: user.friend_code
     };
 
-// achievements
+    // achievements
     // Check if user has taken their first walk
     const firstWalk = await db.oneOrNone(
       `SELECT 1 FROM user_to_history WHERE username = $1 LIMIT 1`,
@@ -818,127 +818,49 @@ app.get('/avatar/:userId', async (req, res) => {
   }
 });
 
-// document.addEventListener("DOMContentLoaded", function () {
-//   const input = document.getElementById('friendSearchInput');
-//   const resultsContainer = document.getElementById('searchResults');
-
-//   if (!input || !resultsContainer) return;
-
-//   input.addEventListener('input', async function () {
-//     const query = input.value.trim();
-
-//     if (query.length < 2) {
-//       resultsContainer.innerHTML = '';
-//       return;
-//     }
-
-//     try {
-//       const res = await fetch(`/search-friends?q=${encodeURIComponent(query)}`);
-//       const data = await res.json();
-
-//       if (data.length === 0) {
-//         resultsContainer.innerHTML = '<p class="text-muted">No users found.</p>';
-//       } else {
-//         resultsContainer.innerHTML = data.map(user => `
-//           <div class="d-flex justify-content-between align-items-center mb-2">
-//             <span>${user.username}</span>
-//             <form method="POST" action="/add-friend">
-//               <input type="hidden" name="search" value="${user.username}">
-//               <button type="submit" class="btn btn-sm btn-success">Add</button>
-//             </form>
-//           </div>
-//         `).join('');
-//       }
-//     } catch (err) {
-//       resultsContainer.innerHTML = '<p class="text-danger">Error searching users.</p>';
-//     }
-//   });
-// });
-
-// Friend Search
-app.post('/add-friend', async (req, res) => {
-  const currentUserId = req.session.userId;
-  const searchTerm = req.body.search;
-
-  // Find the user by username
-  const userResult = await db.query(
-    'SELECT user_id FROM users WHERE username = $1 AND user_id != $2',
-    [searchTerm, currentUserId]
-  );
-
-  if (userResult.rows.length === 0) {
-    return res.send('User not found or already added.');
-  }
-
-  const friendId = userResult.rows[0].user_id;
-
-  // Check if already friends
-  const existing = await db.query(
-    'SELECT * FROM user_to_friend WHERE user_id = $1 AND friend_id = $2',
-    [currentUserId, friendId]
-  );
-
-  if (existing.rows.length === 0) {
-    // Add to user_to_friend
-
-    // if we want to make it one way
-      // await db.query(
-      //   'INSERT INTO user_to_friend (user_id, friend_id) VALUES ($1, $2)',
-      //   [currentUserId, friendId]
-      // );
-
-    // to make it bidirectional
-    await db.query(
-      `INSERT INTO user_to_friend (user_id, friend_id)
-       VALUES ($1, $2), ($2, $1)
-       ON CONFLICT DO NOTHING`,
-      [currentUserId, friendId]
-    );
-  }
-
-  res.redirect('/profile');
-});
-// // Friend search API
-// app.get('/search-friends', async (req, res) => {
-//   const search = req.query.q;
+// // Friend Search
+// app.post('/add-friend', async (req, res) => {
 //   const currentUserId = req.session.userId;
+//   const searchTerm = req.body.search;
 
-//   if (!search) return res.json([]);
+//   // Find the user by username
+//   const userResult = await db.query(
+//     'SELECT user_id FROM users WHERE username = $1 AND user_id != $2',
+//     [searchTerm, currentUserId]
+//   );
 
-//   try {
-//     const users = await db.any(
-//       `SELECT username FROM users 
-//        WHERE username ILIKE $1 AND user_id != $2 
-//        LIMIT 10`, 
-//       [`%${search}%`, currentUserId]
-//     );
-//     res.json(users);
-//   } catch (err) {
-//     console.error('Search error:', err);
-//     res.status(500).json([]);
+//   if (userResult.rows.length === 0) {
+//     return res.send('User not found or already added.');
 //   }
+
+//   const friendId = userResult.rows[0].user_id;
+
+//   // Check if already friends
+//   const existing = await db.query(
+//     'SELECT * FROM user_to_friend WHERE user_id = $1 AND friend_id = $2',
+//     [currentUserId, friendId]
+//   );
+
+//   if (existing.rows.length === 0) {
+//     // Add to user_to_friend
+
+//     // if we want to make it one way
+//       // await db.query(
+//       //   'INSERT INTO user_to_friend (user_id, friend_id) VALUES ($1, $2)',
+//       //   [currentUserId, friendId]
+//       // );
+
+//     // to make it bidirectional
+//     await db.query(
+//       `INSERT INTO user_to_friend (user_id, friend_id)
+//        VALUES ($1, $2), ($2, $1)
+//        ON CONFLICT DO NOTHING`,
+//       [currentUserId, friendId]
+//     );
+//   }
+
+//   res.redirect('/profile');
 // });
-
-// // In your route handler
-// router.get("/find-friends", async (req, res) => {
-//   const currentUser = req.session.user;
-
-//   const allUsers = await db.any('SELECT user_id AS id, username AS name, encode(avatar, \'base64\') AS avatar FROM users');
-
-//   // Convert avatars if needed
-//   const usersWithAvatars = allUsers.map(user => ({
-//     ...user,
-//     avatar: user.avatar 
-//       ? `data:image/png;base64,${user.avatar}` 
-//       : 'https://i.pravatar.cc/100?u=' + user.id
-//   }));
-
-//   res.render("find-friends", {
-//     userData: currentUser,
-//     allUsers: usersWithAvatars
-//   });
-// });
-
 
 // --------------------------------------- SETTINGS ENDPOINTS ------------------------------------------------------------------
 app.get('/settings', (req, res) => {
