@@ -115,7 +115,7 @@ body {
 
         <form action="/login" method="POST">
             <div class="form-group">
-                <label for="username">Email address</label>
+                <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
             </div>
 
@@ -130,6 +130,7 @@ body {
 
         <div class="login-footer">
             <p>Don't have an account? <a href="/register">Sign up for free</a></p>
+                {{> message}}
         </div>
     </div>
 </body>

@@ -61,7 +61,7 @@ db.connect()
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use(
   session({
@@ -124,6 +124,53 @@ app.get('/maps', (req, res) => {
 // API endpoint to check authentication status
 app.get('/api/check-auth', (req, res) => {
   res.json({ isAuthenticated: !!req.session.user });
+});
+
+app.post('/api/trails', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({error: 'Not authenticated'});
+    }
+    
+    const userId = req.session.user.user_id;
+    const {trail_name, start_location, end_location, distance, rating} = req.body;
+   
+    // Check if trail exists by name
+    let trail = await db.oneOrNone(
+      'SELECT trail_id FROM trails WHERE name = $1',
+      [trail_name]
+    );
+
+    if (!trail) {
+      trail = await db.one(
+        'INSERT INTO trails (name, start_location, end_location, distance, average_rating) ' +
+        'VALUES ($1, $2, $3, $4, $5) ' + 
+        ' RETURNING trail_id',
+        [trail_name, start_location, end_location, distance, rating]
+      );
+    }
+
+    // create a new record
+    const today = new Date().toISOString().split('T')[0];
+    const history = await db.one(
+      `INSERT INTO history (trail_id, start_location, end_location, date)
+       VALUES ($1, $2, $3, $4)
+       RETURNING history_id`,
+      [trail.trail_id, start_location, end_location, today]
+    );
+
+    // Link user to the history entry
+    await db.none(
+      `INSERT INTO user_to_history (username, history_id)
+       VALUES ($1, $2)`,
+      [userId, history.history_id]
+    );
+
+    res.status(200).json({success: true});
+  } catch (error) {
+    console.error('Error saving hike to history:', error);
+    res.status(500).json({ error: 'Failed to save hike to history' });
+  }
 });
 
 // API endpoint to toggle trail saving
@@ -199,6 +246,10 @@ app.get('/api/trails', async (req, res) => {
   }
 });
 
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Trail details page
 app.get('/trail/:id', async (req, res) => {
   try {
@@ -252,9 +303,12 @@ app.get('/reviews', async (req, res) => {
     const trails = await db.any(`
       SELECT 
         t.trail_id,
+        t.distance,
+        t.start_location,
+        t.end_location,
         t.name as trail_name,
-        t.location,
         t.difficulty,
+        t.description,
         t.image_url,
         COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0) as avg_rating,
         COUNT(r.review_id) as review_count
@@ -545,6 +599,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.get('/profile', async (req, res) => {
   try {
     const user = req.session.user;
+    const userId = req.session.user.user_id;
 
     // Get saved trails
     const savedTrails = await db.any(`
@@ -552,7 +607,7 @@ app.get('/profile', async (req, res) => {
       FROM trails t
       JOIN user_saved_trails ust ON t.trail_id = ust.trail_id
       WHERE ust.user_id = $1
-    `, [user.user_id]);
+    `, [userId]);
 
     // Get friends
     const friends = await db.any(`
@@ -560,7 +615,7 @@ app.get('/profile', async (req, res) => {
       FROM user_to_friend uf
       JOIN users u ON uf.friend_id = u.user_id
       WHERE uf.username = $1
-    `, [user.user_id]);
+    `, [userId]);
     
     // Get pending requests with sender info
     const friendRequests = await db.any(`
@@ -574,7 +629,7 @@ app.get('/profile', async (req, res) => {
       FROM friend_requests fr
       JOIN users u ON fr.sender_id = u.user_id
       WHERE fr.receiver_id = $1 AND fr.status = 'pending'
-    `, [user.user_id]);
+    `, [userId]);
 
     const userData = {
       name: user.username,
@@ -598,7 +653,7 @@ app.get('/profile', async (req, res) => {
 
     // Check if user has left their first review
     const firstReview = await db.oneOrNone(
-      `SELECT 1 FROM reviews WHERE username = $1 LIMIT 1`,
+      `SELECT 1 FROM reviews WHERE user_id = $1 LIMIT 1`,
       [userId]
     );
 
@@ -818,8 +873,143 @@ app.get('/avatar/:userId', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // // Friend Search
 // app.post('/add-friend', async (req, res) => {
+=======
+
+// --------------------------------------------------------------- Social Media "POSTS" endpoints -------------------------------------------------------------//
+
+// Route to render posts feed
+app.get('/posts', async (req, res) => {
+  try {
+    const rows = await db.any('SELECT post_img, caption FROM posts ORDER BY post_id DESC');
+
+    const posts = rows.map(post => ({
+      post_img: Buffer.isBuffer(post.post_img)
+        ? post.post_img.toString('base64')
+        : null,
+      caption: post.caption
+    }));
+
+    res.render('pages/posts', { posts });
+  } catch (err) {
+    console.error('Error fetching posts:', err.stack || err);
+    res.status(500).send('Server error while fetching posts.');
+  }
+});
+
+// Uploading a new post
+app.post('/upload_post_img', upload.single('post_img'), async (req, res) => {
+  try {
+    const { caption } = req.body;
+
+    if (!req.file || !caption) {
+      return res.status(400).send('Missing image or caption.');
+    }
+
+    // Insert into posts table using db.query
+    await db.query(
+      'INSERT INTO posts (post_img, caption) VALUES ($1, $2)',
+      [req.file.buffer, caption]
+    );
+    // res.json(posts);
+
+    res.redirect('/posts'); // Redirect to the posts feed
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error while uploading post.');
+  }
+});
+
+
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// document.addEventListener("DOMContentLoaded", function () {
+//   const input = document.getElementById('friendSearchInput');
+//   const resultsContainer = document.getElementById('searchResults');
+
+//   if (!input || !resultsContainer) return;
+
+//   input.addEventListener('input', async function () {
+//     const query = input.value.trim();
+
+//     if (query.length < 2) {
+//       resultsContainer.innerHTML = '';
+//       return;
+//     }
+
+//     try {
+//       const res = await fetch(`/search-friends?q=${encodeURIComponent(query)}`);
+//       const data = await res.json();
+
+//       if (data.length === 0) {
+//         resultsContainer.innerHTML = '<p class="text-muted">No users found.</p>';
+//       } else {
+//         resultsContainer.innerHTML = data.map(user => `
+//           <div class="d-flex justify-content-between align-items-center mb-2">
+//             <span>${user.username}</span>
+//             <form method="POST" action="/add-friend">
+//               <input type="hidden" name="search" value="${user.username}">
+//               <button type="submit" class="btn btn-sm btn-success">Add</button>
+//             </form>
+//           </div>
+//         `).join('');
+//       }
+//     } catch (err) {
+//       resultsContainer.innerHTML = '<p class="text-danger">Error searching users.</p>';
+//     }
+//   });
+// });
+
+// Friend Search
+app.post('/add-friend', async (req, res) => {
+  const currentUserId = req.session.userId;
+  const searchTerm = req.body.search;
+
+  // Find the user by username
+  const userResult = await db.query(
+    'SELECT user_id FROM users WHERE username = $1 AND user_id != $2',
+    [searchTerm, currentUserId]
+  );
+
+  if (userResult.rows.length === 0) {
+    return res.send('User not found or already added.');
+  }
+
+  const friendId = userResult.rows[0].user_id;
+
+  // Check if already friends
+  const existing = await db.query(
+    'SELECT * FROM user_to_friend WHERE user_id = $1 AND friend_id = $2',
+    [currentUserId, friendId]
+  );
+
+  if (existing.rows.length === 0) {
+    // Add to user_to_friend
+
+    // if we want to make it one way
+      // await db.query(
+      //   'INSERT INTO user_to_friend (user_id, friend_id) VALUES ($1, $2)',
+      //   [currentUserId, friendId]
+      // );
+
+    // to make it bidirectional
+    await db.query(
+      `INSERT INTO user_to_friend (user_id, friend_id)
+       VALUES ($1, $2), ($2, $1)
+       ON CONFLICT DO NOTHING`,
+      [currentUserId, friendId]
+    );
+  }
+
+  res.redirect('/profile');
+});
+// // Friend search API
+// app.get('/search-friends', async (req, res) => {
+//   const search = req.query.q;
+>>>>>>> bfa9d8b78c14aabdeb187b21182da5bb924d0171
 //   const currentUserId = req.session.userId;
 //   const searchTerm = req.body.search;
 
@@ -925,6 +1115,8 @@ app.post('/settings', async (req, res) => {
     });
   }
 });
+
+
 
 // ----------------------- starting the server -----------------------
 const server = app.listen(3000, () => {

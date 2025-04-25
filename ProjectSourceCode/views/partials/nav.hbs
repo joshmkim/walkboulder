@@ -17,6 +17,8 @@
             z-index: 1030;
         }
 
+        
+
         /* Initial transparent state */
         .navbar.navbar-transparent {
             background-color: transparent !important;
@@ -31,11 +33,11 @@
 
         /* Navbar link colors */
         .navbar-transparent .nav-link {
-            color: white !important;
+            color: rgb(0, 0, 0) !important;
         }
 
         .navbar-transparent .navbar-brand {
-            color: white !important;
+            color: rgb(0, 0, 0) !important;
         }
 
         /* When scrolled, change link colors */
@@ -141,6 +143,11 @@
                             <a class="nav-link fw-medium" href="/reviews">Reviews</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link fw-medium" href="/posts">Posts</a>
+                        </li>
+                        {{#if user}}
+                        <!-- These will only show when logged in -->
+                        <li class="nav-item">
                             <a class="nav-link fw-medium" href="/profile">Profile</a>
                         </li>
                         <li class="nav-item">
@@ -149,9 +156,12 @@
                         <li class="nav-item">
                             <a class="nav-link fw-medium logout-link" href="#">Logout</a>
                         </li>
+                        {{else}}
+                        <!-- This will only show when NOT logged in -->
                         <li class="nav-item">
                             <a class="nav-link login-button" href="/login">Login</a>
                         </li>
+                        {{/if}}
                     </ul>
                 </div>
             </div>
@@ -173,7 +183,7 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const navbar = document.querySelector('.navbar');
-        const solidRoutes = ['/maps', '/profile', '/settings', '/login', '/register', '/trail'];
+        const solidRoutes = ['/maps', '/profile', '/settings', '/login', '/register', '/trail', '/reviews', '/posts'];
         const currentPath = window.location.pathname;
 
         // Check if current path starts with any solid route (including trail pages)
@@ -226,5 +236,8 @@
         });
       });
     </script>
+
+
+    
 </body>
 </html>

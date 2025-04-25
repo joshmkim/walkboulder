@@ -6,34 +6,147 @@
   <title>Walk Boulder</title>
   <link rel="stylesheet" href="/styles.css">
   <style>
-    .bookmark-icon {
-      width: 20px;
-      height: 20px;
+    .search-container {
+      position: relative;
+      width: 100%;
     }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1.5rem 1rem 3.5rem;
+      font-size: 1.125rem;
+      border: none;
+      border-radius: 9999px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: border-radius 0.2s ease;
+    }
+
+    .search-input.dropdown-open {
+      border-radius: 1.5rem 1.5rem 0 0;
+    }
+
     .search-dropdown {
       position: absolute;
-      top: 100%;
+      top: calc(100% - 1px);
       left: 0;
       right: 0;
       z-index: 10;
       background: white;
-      border-radius: 0 0 0.5rem 0.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 1.5rem 1.5rem;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-      margin-top: -0.25rem;
-      display: none;
+      list-style-type: none;
+      padding: 0.5rem;
+      margin: 0;
+      max-height: 350px;
+      overflow-y: auto;
+      opacity: 0;
+      transform: translateY(-10px);
+      visibility: hidden;
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
     }
+
+    .search-dropdown.visible {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+
     .search-dropdown-item {
-      padding: 0.75rem 1rem;
+      padding: 0.75rem;
       cursor: pointer;
-      border-bottom: 1px solid #eee;
-      transition: background-color 0.2s;
+      border-radius: 0.75rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
-    .search-dropdown-item:hover {
-      background-color: #f5f5f5;
+
+    .search-dropdown-item:hover,
+    .search-dropdown-item.active {
+      background-color: rgba(16, 185, 129, 0.1);
     }
-    .search-dropdown-item:last-child {
-      border-bottom: none;
+
+    .search-dropdown-item-empty {
+      padding: 1.5rem;
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    .trail-thumbnail {
+      width: 48px;
+      height: 48px;
+      border-radius: 0.5rem;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .trail-info {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: #666;
+    }
+
+    .trail-info span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .trail-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.25rem;
+    }
+
+    .trail-details {
+      flex-grow: 1;
+    }
+
+    .trail-location {
+      color: #10b981;
+      margin-left: auto;
+    }
+
+    .search-dropdown::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .search-dropdown::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 8px;
+    }
+
+    .search-dropdown::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 8px;
+    }
+
+    .search-dropdown::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    @media (max-width: 640px) {
+      .search-dropdown {
+        max-height: 300px;
+      }
+      
+      .search-dropdown-item {
+        padding: 0.6rem;
+      }
+      
+      .trail-info {
+        gap: 0.75rem;
+        font-size: 0.75rem;
+      }
+
+      .trail-thumbnail {
+        width: 40px;
+        height: 40px;
+      }
     }
   </style>
 </head>
@@ -44,12 +157,14 @@
       background-size: cover; background-position: center; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 1rem; margin-top: -56px; padding-top: 56px;">
       <h1 style="color: white; font-size: 4rem; font-weight: bold; margin-bottom: 2rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">Walk Boulder</h1>
       <div style="width: 100%; max-width: 600px; margin-bottom: 2rem; position: relative;">
-        <div style="position: relative; display: flex; align-items: center;">
-          <svg style="position: absolute; left: 1.5rem; width: 20px; height: 20px; color: #666;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input type="text" placeholder="Search by city, park, or trail name" style="width: 100%; padding: 1rem 1.5rem 1rem 3.5rem; font-size: 1.125rem; border: none; border-radius: 9999px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <div class="search-container">
+          <div style="position: relative; display: flex; align-items: center;">
+            <svg style="position: absolute; left: 1.5rem; width: 20px; height: 20px; color: #666;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by city, park, or trail name">
+          </div>
           <ul class="search-dropdown" id="searchDropdown"></ul>
         </div>
       </div>
@@ -68,6 +183,8 @@
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       let trails = [];
+      let activeIndex = -1;
+      const searchInput = document.getElementById('searchInput');
 
       // Load trails data
       try {
@@ -97,55 +214,57 @@
             <div style="padding: 1.25rem;">
               <a href="/trail/${trail.trail_id}" style="text-decoration: none; color: inherit;">
                 <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;">${trail.name}</h3>
-                <p style="color: #666; font-size: 0.875rem;">${trail.distance} mi • ${trail.difficulty}</p>
-                <p style="color: #666; font-size: 0.875rem;">${trail.location}</p>
+                <p style="color: #666; font-size: 0.875rem;">${trail.distance} mi &nbsp;&nbsp;&nbsp;  ${trail.average_rating}★</p>
               </a>
             </div>
           </div>
         `).join('');
 
         // Initialize bookmark buttons
-        // In your home.hbs, update the bookmark button event listener:
-document.querySelectorAll('.bookmark-btn').forEach(btn => {
-  btn.addEventListener('click', async function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const trailId = this.getAttribute('data-trail-id');
-    const icon = this.querySelector('svg');
-    
-    try {
-      // Check if user is authenticated
-      const authResponse = await fetch('/api/check-auth');
-      const { isAuthenticated } = await authResponse.json();
-      
-      if (!isAuthenticated) {
-        window.location.href = '/login?returnTo=' + encodeURIComponent(window.location.pathname);
-        return;
-      }
-      
-      // Toggle bookmark
-      const toggleResponse = await fetch('/api/toggle-save-trail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ trailId })
-      });
-      
-      const { isSaved } = await toggleResponse.json();
-      
-      // Update icon - change to blue when saved
-      if (isSaved) {
-        icon.setAttribute('fill', '#3b82f6'); // Blue color
-      } else {
-        icon.setAttribute('fill', 'none');
-      }
-      
-    } catch (error) {
-      console.error('Error toggling bookmark:', error);
-    }
-  });
-});
+        document.querySelectorAll('.bookmark-btn').forEach(btn => {
+          btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const trailId = this.getAttribute('data-trail-id');
+            if (!trailId) {
+              console.error("Trail ID is null");
+              return;
+            }
+            const icon = this.querySelector('svg');
+            
+            try {
+              // Check if user is authenticated
+              const authResponse = await fetch('/api/check-auth');
+              const { isAuthenticated } = await authResponse.json();
+              
+              if (!isAuthenticated) {
+                window.location.href = '/login?returnTo=' + encodeURIComponent(window.location.pathname);
+                return;
+              }
+              
+              // Toggle bookmark
+              const toggleResponse = await fetch('/api/toggle-save-trail', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ trailId })
+              });
+              
+              const { isSaved } = await toggleResponse.json();
+              
+              // Update icon - change to blue when saved
+              if (isSaved) {
+                icon.setAttribute('fill', '#3b82f6'); // Blue color
+              } else {
+                icon.setAttribute('fill', 'none');
+              }
+              
+            } catch (error) {
+              console.error('Error toggling bookmark:', error);
+            }
+          });
+        });
 
       } catch (error) {
         console.error("Error loading trails:", error);
@@ -158,47 +277,99 @@ document.querySelectorAll('.bookmark-btn').forEach(btn => {
       }
 
       // Search functionality
-      const input = document.querySelector('input[type="text"]');
       const dropdown = document.getElementById('searchDropdown');
 
-      input.addEventListener('input', () => {
-        const query = input.value.toLowerCase().trim();
+      const updateDropdown = (matches) => {
         dropdown.innerHTML = '';
-
-        if (!query) {
-          dropdown.style.display = 'none';
-          return;
-        }
-
-        const matches = trails.filter(t =>
-          t.name.toLowerCase().includes(query) ||
-          t.location.toLowerCase().includes(query)
-        );
-
+        searchInput.classList.toggle('dropdown-open', matches.length > 0);
+        
         if (matches.length === 0) {
-          dropdown.style.display = 'none';
+          const noResults = document.createElement('li');
+          noResults.className = 'search-dropdown-item-empty';
+          noResults.textContent = 'No trails found';
+          dropdown.appendChild(noResults);
+        } else {
+          matches.forEach((trail, index) => {
+            const item = document.createElement('li');
+            item.className = `search-dropdown-item ${index === activeIndex ? 'active' : ''}`;
+            item.innerHTML = `
+              <img src="${trail.image_url}" alt="${trail.name}" class="trail-thumbnail">
+              <div class="trail-details">
+                <div class="trail-name">${trail.name}</div>
+                <div class="trail-info">
+                  <span>${trail.distance} mi</span>
+                  <span>${trail.average_rating}★</span>
+                </div>
+              </div>
+              <div class="trail-location">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </div>
+            `;
+            
+            item.addEventListener('click', () => {
+              window.location.href = `/trail/${trail.trail_id}`;
+            });
+            
+            item.addEventListener('mouseenter', () => {
+              activeIndex = index;
+              updateDropdown(matches);
+            });
+            
+            dropdown.appendChild(item);
+          });
+        }
+
+        dropdown.classList.toggle('visible', matches.length > 0);
+      };
+
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase().trim();
+        
+        if (query.length === 0) {
+          dropdown.classList.remove('visible');
+          searchInput.classList.remove('dropdown-open');
           return;
         }
 
-        matches.forEach(trail => {
-          const item = document.createElement('li');
-          item.className = 'search-dropdown-item';
-          item.innerHTML = `
-            <strong>${trail.name}</strong>
-            <div style="font-size: 0.875rem; color: #666;">${trail.location} • ${trail.distance}mi</div>
-          `;
-          item.addEventListener('click', () => {
-            window.location.href = `/trail/${trail.trail_id}`;
-          });
-          dropdown.appendChild(item);
-        });
+        const matches = trails.filter(trail => 
+          trail.name.toLowerCase().includes(query)
+        ).slice(0, 5);
 
-        dropdown.style.display = 'block';
+        activeIndex = -1;
+        updateDropdown(matches);
       });
 
+      // Keyboard navigation
+      searchInput.addEventListener('keydown', (e) => {
+        const matches = trails.filter(trail => 
+          trail.name.toLowerCase().includes(searchInput.value.toLowerCase().trim())
+        ).slice(0, 5);
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          activeIndex = Math.min(activeIndex + 1, matches.length - 1);
+          updateDropdown(matches);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          activeIndex = Math.max(activeIndex - 1, 0);
+          updateDropdown(matches);
+        } else if (e.key === 'Enter' && activeIndex >= 0) {
+          e.preventDefault();
+          window.location.href = `/trail/${matches[activeIndex].trail_id}`;
+        } else if (e.key === 'Escape') {
+          dropdown.classList.remove('visible');
+          searchInput.classList.remove('dropdown-open');
+        }
+      });
+
+      // Close dropdown when clicking outside
       document.addEventListener('click', (e) => {
-        if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-          dropdown.style.display = 'none';
+        if (!e.target.closest('.search-container')) {
+          dropdown.classList.remove('visible');
+          searchInput.classList.remove('dropdown-open');
         }
       });
     });

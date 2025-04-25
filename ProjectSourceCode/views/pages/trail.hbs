@@ -49,6 +49,26 @@
       margin-bottom: 1rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
+    .no-images-placeholder {
+      width: 100%;
+      height: 200px;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      margin-top: 1rem;
+    }
+
+    .no-reviews-message {
+      background: #f5f5f5;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -57,7 +77,7 @@
     <div class="trail-header">
       <div>
         <h1 style="font-size: 3rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">{{trail.name}}</h1>
-        <p style="font-size: 1.25rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">{{trail.location}}</p>
+  
       </div>
     </div>
 
@@ -69,10 +89,6 @@
           <div style="font-weight: bold; font-size: 1.25rem;">{{trail.distance}} mi</div>
         </div>
         <div class="stat-item">
-          <div style="font-size: 0.875rem; color: #666;">Difficulty</div>
-          <div style="font-weight: bold; font-size: 1.25rem;">{{trail.difficulty}}</div>
-        </div>
-        <div class="stat-item">
           <div style="font-size: 0.875rem; color: #666;">Rating</div>
           <div style="font-weight: bold; font-size: 1.25rem;">{{trail.average_rating}}/5</div>
         </div>
@@ -80,8 +96,10 @@
 
       <div style="margin-top: 2rem;">
         <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">About This Trail</h2>
-        <p style="line-height: 1.6;">{{trail.discription}}</p>
+        <p style="line-height: 1.6;">{{trail.description}}</p>
       </div>
+
+
 
       <!-- Reviews Section -->
       <div class="reviews-section">
@@ -93,18 +111,14 @@
                 <span style="font-weight: bold;">{{this.username}}</span>
                 <span>Rating: {{this.rating}}/5</span>
               </div>
-              <p>{{this.review}}</p>
-              {{#if this.images}}
-                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                  {{#each this.images}}
-                    <img src="{{this.image_url}}" alt="Review photo" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px;">
-                  {{/each}}
-                </div>
-              {{/if}}
+      <p>{{this.written_review}}</p>
+
             </div>
           {{/each}}
         {{else}}
-          <p>No reviews yet. Be the first to review!</p>
+          <div class="no-reviews-message">
+            No reviews available yet. Be the first to review this trail!
+          </div>
         {{/if}}
       </div>
     </div>

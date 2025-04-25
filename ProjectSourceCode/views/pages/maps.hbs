@@ -1802,12 +1802,12 @@ startAutocomplete.addListener('place_changed', () => {
         </div>
 
         <div class="destination-controls">
-          <a class="directions-button" href=${destination.url} target="_blank"
-             aria-label="Link to directions in Google Maps">
-            <svg aria-label="Delete route icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          <button class="edit-button" aria-label="Save Trail">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <use href="#commutes-edit-icon"/>
             </svg>
-          </a>
+            Edit
+          </button>
 
 <button class="edit-button" aria-label="Save Trail" onclick="openSaveTrailModal('${destination.startAddress}', '${destination.destinationAddress}', '${destination.distance}')">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -1867,17 +1867,7 @@ startAutocomplete.addListener('place_changed', () => {
         <input type="number" id="trailRating" name="trailRating" step="0.1" min="0" max="5">
       </div>
             
-      <div class="form-group">
-        <label for="buddy_modality">Buddy</label>
-        <select class="form-control" id="buddy_modality" name="buddy">
-          <option value="" selected>No Friend</option>
-          {{#if userData.friends.length}}
-            {{#each userData.friends}}
-              <option value="{{this.id}}">{{this.name}}</option>
-            {{/each}}
-          {{/if}}
-        </select>
-      </div>
+
 
       <button type="submit" class="save-button">
         Save Trail
@@ -1927,9 +1917,9 @@ document.getElementById('trailForm').addEventListener('submit', function(e) {
   
   // Get form data
   const formData = {
-    name: document.getElementById('trailName').value,
-    start_location: document.getElementById('startLocation').value,
-    end_location: document.getElementById('endLocation').value,
+    trail_name: document.getElementById('trailName').value,
+    start: document.getElementById('startLocation').value,
+    end: document.getElementById('endLocation').value,
     distance: parseFloat(document.getElementById('trailDistance').value),
     average_rating: parseFloat(document.getElementById('trailRating').value) || null
   };
@@ -1941,7 +1931,13 @@ document.getElementById('trailForm').addEventListener('submit', function(e) {
       'Content-Type': 'application/json',
     },
     credentials: 'include', // Important for session cookies
-    body: JSON.stringify(formData)
+    body: JSON.stringify({
+      trail_name: formData.trail_name,
+      start_location: formData.start,
+      end_location: formData.end,
+      distance: formData.distance,
+      rating: formData.average_rating,
+    })
   })
   .then(response => {
     if (response.status === 401) {
@@ -1951,6 +1947,7 @@ document.getElementById('trailForm').addEventListener('submit', function(e) {
     if (!response.ok) {
       return response.json().then(err => { throw new Error(err.error); });
     }
+    console.log(response);
     return response.json();
   })
   .then(data => {
@@ -1962,7 +1959,7 @@ document.getElementById('trailForm').addEventListener('submit', function(e) {
     }
   })
   .catch(error => {
-    console.error('Error:', error);
+    console.error('Fetch Error:', error);
     alert('Error saving trail: ' + error.message);
   });
 });
