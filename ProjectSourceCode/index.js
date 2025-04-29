@@ -873,10 +873,6 @@ app.get('/avatar/:userId', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-// // Friend Search
-// app.post('/add-friend', async (req, res) => {
-=======
 
 // --------------------------------------------------------------- Social Media "POSTS" endpoints -------------------------------------------------------------//
 
@@ -1009,7 +1005,6 @@ app.post('/add-friend', async (req, res) => {
 // // Friend search API
 // app.get('/search-friends', async (req, res) => {
 //   const search = req.query.q;
->>>>>>> bfa9d8b78c14aabdeb187b21182da5bb924d0171
 //   const currentUserId = req.session.userId;
 //   const searchTerm = req.body.search;
 
