@@ -1,6 +1,11 @@
 # WalkBoulder
 ## 1. Application Description
-Design walking application that implements a map that is valuable to locals of Boulder who love walking. Users will be allowed to create their own routes to different areas around Boulder. It will also allow users to track their distance, fellow users, routes. There will be a reward system to encourage walking / exploring Boulder and using the application.
+WalkBoulder is an app that gives users important information about walking/hiking trails in and around the city of Boulder. It uses the Google Maps API to display a map of Boulder and allows users to create a trail between two places in Boulder. These locations are validated by the Google Maps Autocomplete feature. The website also saves these trails so that they can be displayed on the home page. Users are then able to search for trails, review them, and add them to their profiles.
+
+To allow for personalization, we provide users with the ability to change their profile with updated information, such as name and email, and a profile picture. Additionally, users can engage with others through the Posts feature, where users can upload images with captions that are then displayed for all users on the app.
+
+Furthermore, users can connect with one another by sending friend requests. Upon acceptance, the two users are connected in the database. This was not a core feature of the website, but it could be improved by allowing users to share walk information with their friends and providing them with the ability to save walks as group walks among friends.
+
 
 ## 2. Contributors
 FIRSTNAME | LASTNAME  | GITHUB_PROFILE
