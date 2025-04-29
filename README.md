@@ -28,5 +28,7 @@ For prerequisites, we need to have the docker installed and set up so that way t
 To get the project to run, cd into ProjectSourceCode and then run docker compose up. 
 
 ## 6. Running Tests
+Tests are automatically run on docker compose up.
 
-## 7. Link 
+## 7. Link
+https://walkboulderwebservice.onrender.com/
